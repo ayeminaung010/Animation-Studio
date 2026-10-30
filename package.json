@@ -45,7 +45,8 @@
     "voice": "node tools/ep.mjs voice",
     "mix:check": "node tools/ep.mjs mix:check",
     "qa": "node tools/ep.mjs qa",
-    "clean": "node tools/clean.mjs"
+    "clean": "node tools/clean.mjs",
+    "test": "node tools/run-ts.mjs tools/test-motion.ts"
   },
   "allowScripts": {
     "esbuild": false
