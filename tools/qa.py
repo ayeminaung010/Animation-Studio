@@ -58,6 +58,17 @@ def main():
     lufs = float(summ.split("I:")[1].split("LUFS")[0])
     tp = float(summ.split("Peak:")[1].split("dBFS")[0])
     check("Audio peaks below −1 dB", tp < -1.0, f"true peak {tp:+.2f} dBTP, integrated {lufs:.1f} LUFS")
+    check("Loudness near −14 LUFS (YouTube target)", abs(lufs + 14) <= 1.0, f"integrated {lufs:.1f} LUFS (−15…−13)")
+
+    # --- tail: last 4 s in 50 ms windows; digital silence while the picture runs = the mix stopped dead
+    sr, hop = 8000, 400
+    x = np.frombuffer(subprocess.run(["ffmpeg", "-v", "error", "-sseof", "-4", "-i", str(mp4), "-vn", "-ac", "1", "-ar", str(sr),
+                                      "-f", "f32le", "-"], capture_output=True).stdout, np.float32)
+    n = len(x) // hop
+    rms_db = 20 * np.log10(np.sqrt((x[: n * hop].reshape(n, hop) ** 2).mean(1)) + 1e-9)
+    dead = [i for i in range(n - 2) if rms_db[i] < -80]  # last 2 windows may fade to zero
+    check("Sound runs to the last frame", n > 0 and not dead,
+          f"silent from {(n - dead[0]) * 0.05:.2f} s before the end" if dead else f"last 4 s from {rms_db[0]:.0f} to {rms_db[-1]:.0f} dB")
 
     # --- flicker: frame-to-frame change inside shots (cuts excluded) at 135×240 greyscale
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(mp4), "-vf", "scale=135:240,format=gray", "-f", "rawvideo", "-"],
