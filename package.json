@@ -46,7 +46,7 @@
     "mix:check": "node tools/ep.mjs mix:check",
     "qa": "node tools/ep.mjs qa",
     "clean": "node tools/clean.mjs",
-    "test": "node tools/run-ts.mjs tools/test-motion.ts"
+    "test": "node tools/run-ts.mjs tools/test-motion.ts && node tools/run-ts.mjs tools/test-scenes.ts"
   },
   "allowScripts": {
     "esbuild": false

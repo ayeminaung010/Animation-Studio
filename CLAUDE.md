@@ -27,9 +27,10 @@ renders it. Read `README.md` for the layout and `SETUP.md` for commands.
   `Captions`, `Soundtrack`, `toon` (`T` = toon mesh with outline, `Ink` = flat black detail).
 - `src/motion/` — motion v2 (in progress, see `motion-upgrade/`): `motion-kit.ts` (copied from the
   bundle, don't edit), `useCharacterMotion.ts` (all layers for one character at one frame, on top of the
-  action pose), `gestures.ts` (15 gesture poses), `fromShot.ts` (default performance per shot), `cameraTrack.ts` + `TrackCamera.tsx`
+  action pose), `gestures.ts` (15 gesture poses), `defaults.ts`, `resolveScene.ts` (v1.1 scene → frames), `cameraTrack.ts` + `TrackCamera.tsx`
   (continuous camera; knobs in `CAMERA`), `Transition.tsx` (FLYOVER/THROUGH/IRIS/MATCH/FLASH/WHIP/CUT). v1 is
-  untouched when `motion` is "v1" (the composition default). Check v2 with `MOTION=v2 npm run stills -- <slug>`
+  untouched when `motion` is "v1" (the composition default). v2 renders `src/lib/migrate.ts` output
+  (v1.1 contract, `src/lib/scenes.ts`) through `src/components/SceneView.tsx`, one `<Sequence>` per scene. Check v2 with `MOTION=v2 npm run stills -- <slug>`
   (→ `out/stills-v2/`), gesture poses with the `gesture-sheet` composition, and `npm test` after motion changes.
 - `src/sets/index.tsx`, `src/props/*` — the library. New props must be registered in
   `src/props/index.tsx`; unknown names throw with a message saying where to add them.
@@ -67,6 +68,7 @@ leaves headroom for AAC overshoot. Check without rendering: `npm run mix:check -
    readable text.
 3. `npm run mix:check -- <slug>` after any audio change.
 4. Rendering is done by the user on their own machine (`npm run render -- <slug>`); don't start a
-   full render unless asked. After a render: `npm run qa -- <slug>` — all checks PASS.
+   full render unless asked. After a render: `npm run qa -- <slug>` — all checks PASS. To read the whole
+   render in one image: `python3 claude-video-kit/.claude/skills/video-qa/scripts/csheet.py out/<slug>.mp4 0 60 2 out/qa/sheet.jpg`.
 5. Only when the user says the episode is final: `npm run clean -- <slug>`, show them the list, then
    `--yes`. Then `npm run check`.

@@ -4,61 +4,23 @@ import { useAudioData, visualizeAudio } from "@remotion/media-utils";
 import { ThreeCanvas } from "@remotion/three";
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import type { CharacterDef, Vec3 } from "../lib/shots";
-import { densify, moveKeys, type TrackSpec } from "../motion/cameraTrack";
-import { seedFor, shotPerformances } from "../motion/fromShot";
-import { SPRINGS, springStep } from "../motion/motion-kit";
-import { TrackCamera } from "../motion/TrackCamera";
-import { fromV1Transition, TransitionWrap, type TransitionType } from "../motion/Transition";
-import { characterMotion } from "../motion/useCharacterMotion";
-import { resolveAt, type ShotTiming, type StartAt } from "../lib/timing";
+import type { CharacterDef } from "../lib/shots";
+import { cameraSpecAt, placementsFor, type Placement, type ShotLayout } from "../lib/staging";
+import { resolveAt, type ShotTiming } from "../lib/timing";
 import { propComponent } from "../props";
 import { setDef } from "../sets";
 import { CameraRig, type CameraSpec } from "./CameraRig";
-import { poseFor } from "./actions";
-import { Character, headWorld, markWorld, poseDrop } from "./Character";
+import { Character } from "./Character";
 import { BACKGROUND, Lighting } from "./Lighting";
 
 export type MotionVersion = "v1" | "v2";
 
-export interface Placement {
-  /** World position, or an offset inside the slot when `hand`/`head`/`front` is set. */
-  at?: Vec3;
-  rot?: Vec3;
-  scale?: number;
-  hand?: "L" | "R";
-  head?: boolean;
-  front?: boolean;
-  /** Character that holds/wears/carries the prop. */
-  char?: string;
-  /** Offset from the prop position to where the camera should aim. */
-  focus?: Vec3;
-  /** Delay the prop's own animation: a frame, or a spoken word in this shot (it starts on that word). */
-  startAt?: StartAt;
-}
-
-
-export interface ShotLayout {
-  /** Placement per prop name; the i-th occurrence in the shot list uses the i-th entry. */
-  props?: Record<string, Placement[]>;
-  /** Props not in the shot list that the scene still needs (a phone in a hand…). */
-  extra?: { name: string; place: Placement }[];
-  chars?: Record<string, { facing?: number; offset?: Vec3 }>;
-  /** Override the camera's aim point (world). */
-  target?: Vec3;
-  /** Multiply the framing heights (for tiny or huge subjects). */
-  frameScale?: number;
-  azimuth?: number;
-  elevation?: number;
-  bulb?: Vec3;
-}
+export type { Placement, ShotLayout } from "../lib/staging";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
-const add = (a: Vec3, b: Vec3 = [0, 0, 0]): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-const rotY = (v: Vec3, a: number): Vec3 => [v[0] * Math.cos(a) + v[2] * Math.sin(a), v[1], -v[0] * Math.sin(a) + v[2] * Math.cos(a)];
 
 /** Mouth opening from the voice loudness at this frame (only for characters marked speaking). */
-const useMouth = (voice: string, globalFrame: number, enabled: boolean) => {
+export const useMouth = (voice: string, globalFrame: number, enabled: boolean) => {
   const { fps } = useVideoConfig();
   const audio = useAudioData(staticFile(voice));
   if (!enabled || !audio) return 0;
@@ -73,11 +35,7 @@ export const ShotView: React.FC<{
   layout: ShotLayout;
   /** Path of the voice file inside public/ (drives speaking mouths). */
   voice: string;
-  /** "v2" layers motion-kit performances (idle, gaze, blinks, follow-through) over the actions. */
-  motion?: MotionVersion;
-  /** v2: how this shot hands over to the next one (its out-half plays over the last frames). */
-  transitionOut?: TransitionType;
-}> = ({ timing, characters, layout, voice, motion = "v1", transitionOut }) => {
+}> = ({ timing, characters, layout, voice }) => {
   const f = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const { shot, durationInFrames: d, emphasisFrame } = timing;
@@ -89,19 +47,8 @@ export const ShotView: React.FC<{
   const talker = timing.words.filter((w) => w.start <= f).pop()?.speaker;
   const talks = (c: { id: string; speaking?: boolean }) => (shot.lines ? talker === c.id : c.speaking);
   const chars = layout.chars ?? {};
-  const perfs = motion === "v2" ? shotPerformances(timing, layout, fps) : null;
 
-  // Resolve every prop occurrence to a placement.
-  const seen: Record<string, number> = {};
-  const placed = [
-    ...shot.props.map((name) => {
-      const i = seen[name] ?? 0;
-      seen[name] = i + 1;
-      const list = layout.props?.[name] ?? [];
-      return { name, place: list[i] ?? list[list.length - 1] ?? {} };
-    }),
-    ...(layout.extra ?? []),
-  ];
+  const placed = placementsFor(shot, layout);
 
   const propNode = (name: string, p: Placement, key: string) => {
     const C = propComponent(name);
@@ -127,101 +74,40 @@ export const ShotView: React.FC<{
     .filter(({ place }) => !place.char)
     .map(({ name, place, i }) => propNode(name, place, `${name}-${i}`));
 
-  // Camera target at a frame: a layout override, a character in the shot, or a placed prop.
-  const tName = shot.camera.target;
-  const tChar = shot.characters.find((c) => c.id === tName);
-  const specAt = (fr: number): CameraSpec => {
-    let target: Vec3 = [0, 1.2, 0];
-    let isCharacter = false;
-    if (layout.target) {
-      target = layout.target;
-    } else if (tChar) {
-      // Aim at the head where the pose actually puts it (kneeling, sitting, leaning).
-      const pose = poseFor(tChar.action, fr, d);
-      target = headWorld(tChar.pos, chars[tChar.id]?.offset, poseDrop(pose) + Math.max(0, pose.lean) * 0.55);
-      isCharacter = true;
-    } else {
-      const p = placed.find((x) => x.name === tName)?.place;
-      if (p?.char) {
-        const c = shot.characters.find((x) => x.id === p.char);
-        if (c) {
-          const facing = chars[c.id]?.facing ?? 0;
-          target = add(add(markWorld(c.pos, chars[c.id]?.offset), rotY(p.at ?? [0, 0, 0], facing)), p.focus);
-        }
-      } else if (p) {
-        target = add(p.at ?? [0, 0, 0], p.focus);
-      }
-    }
-    return {
-      move: shot.camera.move,
-      from: shot.camera.from,
-      to: shot.camera.to,
-      target,
-      isCharacter,
-      azimuth: layout.azimuth,
-      elevation: layout.elevation,
-      frameScale: layout.frameScale,
-    };
-  };
+  const specAt = (fr: number): CameraSpec => cameraSpecAt(shot, layout, placed, fr, d);
 
   const SetC = set.component;
   const whip = shot.transition_in === "whip";
   const flash = shot.transition_in === "flash";
-  const v2 = motion === "v2";
-
-  // v2: one continuous track through the shot's move, handheld drift, an impact on "shake" shots.
-  const track: TrackSpec | null = v2
-    ? {
-      keys: densify(moveKeys(specAt, 0, d), fps),
-      seed: seedFor(shot.id),
-      shakes: shot.camera.move === "shake" ? [{ frame: emphasisFrame ?? 0, strength: 1 }] : [],
-    }
-    : null;
 
   const scene = (
     <ThreeCanvas width={width} height={height} gl={{ antialias: true }}>
       <color attach="background" args={[bg]} />
       <Lighting name={shot.lighting} bulb={layout.bulb} />
-      {track ? <TrackCamera track={track} frame={f} /> : <CameraRig spec={specAt(f)} frame={f} duration={d} />}
+      <CameraRig spec={specAt(f)} frame={f} duration={d} />
       {/* No inner <Suspense>: ThreeCanvas's own boundary holds the frame until textures load. */}
       <SetC f={f} />
-      {shot.characters.map((c) => {
-        const m = perfs ? characterMotion(f, fps, perfs[c.id]) : undefined;
-        return (
-          <Character
-            key={c.id}
-            def={characters[c.id]}
-            pos={c.pos}
-            face={c.face}
-            action={c.action}
-            frame={f}
-            duration={d}
-            mouthOpen={(m ? m.speaking : talks(c)) ? mouth : 0}
-            motion={m}
-            facing={chars[c.id]?.facing}
-            offset={chars[c.id]?.offset}
-            leftHand={slot(c.id, "L")}
-            rightHand={slot(c.id, "R")}
-            headwear={slot(c.id, "head")}
-            front={slot(c.id, "front")}
-          />
-        );
-      })}
+      {shot.characters.map((c) => (
+        <Character
+          key={c.id}
+          def={characters[c.id]}
+          pos={c.pos}
+          face={c.face}
+          action={c.action}
+          frame={f}
+          duration={d}
+          mouthOpen={talks(c) ? mouth : 0}
+          facing={chars[c.id]?.facing}
+          offset={chars[c.id]?.offset}
+          leftHand={slot(c.id, "L")}
+          rightHand={slot(c.id, "R")}
+          headwear={slot(c.id, "head")}
+          front={slot(c.id, "front")}
+        />
+      ))}
       {world}
     </ThreeCanvas>
   );
-
-  if (v2) {
-    // Emphasis punch springs in (a little overshoot) instead of a 4-frame linear zoom.
-    const punch = emphasisFrame === null ? 1 : 1 + 0.05 * springStep((f - emphasisFrame) / fps, SPRINGS.head);
-    return (
-      <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>
-        <TransitionWrap in={fromV1Transition(shot.transition_in)} out={transitionOut} frame={f} duration={d}>
-          <AbsoluteFill style={{ scale: punch }}>{scene}</AbsoluteFill>
-        </TransitionWrap>
-      </AbsoluteFill>
-    );
-  }
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>

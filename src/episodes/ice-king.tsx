@@ -7,7 +7,10 @@ import wordsJson from "../../episodes/ice-king/04-words.json";
 import { Captions } from "../components/Captions";
 import { ShotView, type MotionVersion, type ShotLayout } from "../components/Shot";
 import { Soundtrack } from "../components/Soundtrack";
-import { fromV1Transition } from "../motion/Transition";
+import { SceneView } from "../components/SceneView";
+import { migrateV1toV2 } from "../lib/migrate";
+import { validateProject } from "../lib/scenes";
+import { resolveScene } from "../motion/resolveScene";
 import { placeCues } from "../lib/cues";
 import { CUES } from "./ice-king.cues";
 import { parseEpisode, parseWords } from "../lib/shots";
@@ -97,18 +100,27 @@ for (const t of timings) {
 export const cues = placeCues(timings, CUES);
 const emphasis = new Set(timings.flatMap((t) => (t.emphasisWord === null ? [] : [t.emphasisWord])));
 
+// Motion v2: the shot list migrated to v1.1 scenes (one continuous take per set run).
+export const project = validateProject(migrateV1toV2(episode, words, LAYOUT));
+const scenes = project.scenes.map((_, i) => resolveScene(project, i, episode.fps));
+
 export const IceKing: React.FC<{ motion: MotionVersion }> = ({ motion }) => (
   <AbsoluteFill
     style={{
       backgroundColor: "black"
     }}
   >
-    {timings.map((t, k) => (
-      <Sequence key={t.shot.id} name={`${t.shot.id} · ${t.shot.beat}`} from={t.from} durationInFrames={t.durationInFrames}>
-        <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} motion={motion}
-          transitionOut={timings[k + 1] ? fromV1Transition(timings[k + 1].shot.transition_in) : undefined} />
-      </Sequence>
-    ))}
+    {motion === "v2"
+      ? scenes.map((s) => (
+        <Sequence key={s.id} name={`${s.id} · ${s.set}`} from={s.from} durationInFrames={s.duration}>
+          <SceneView scene={s} voice={VOICE} />
+        </Sequence>
+      ))
+      : timings.map((t) => (
+        <Sequence key={t.shot.id} name={`${t.shot.id} · ${t.shot.beat}`} from={t.from} durationInFrames={t.durationInFrames}>
+          <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} />
+        </Sequence>
+      ))}
     <Captions words={words} emphasis={emphasis} />
     <Soundtrack voice={VOICE} music={MUSIC} cues={cues} />
   </AbsoluteFill>
