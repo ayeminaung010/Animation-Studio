@@ -49,14 +49,17 @@ renders it. Read `README.md` for the layout and `SETUP.md` for commands.
   than ~2.5 world units won't fit a medium shot: set a `target` between them or `frameScale`.
 - Props that should start on a spoken word use `startAt: { word, offset }`; sounds use the same
   form in the cue sheet, so a receipt pop and its ding stay in sync.
-- Captions sit at 55% height inside the 7–85% width safe area; keep key action out of the bottom
+- Captions sit at 55% height (motion v2: 70%, one yellow word per sentence; a console warning names
+  any scene/word where the band covers a face) inside the 7–85% width safe area; keep key action out of the bottom
   20% and right 15% (YouTube buttons).
 
 ## Mix targets
 
 Voice 0 dB (reference), music −21 dB (−20…−24), SFX −6…−12 dB, final true peak below −1 dBTP,
 voice at least ~3 dB above music + SFX in every spoken window. `MASTER_DB` in `src/lib/cues.ts`
-leaves headroom for AAC overshoot. Check without rendering: `npm run mix:check -- <slug>`.
+leaves headroom for AAC overshoot. Motion v2 ducks the music (−21 dB under the voice, +12 dB in
+pauses, `musicDbAt` in `src/lib/cues.ts`) over a continuous room-tone `BED`, so the mix never drops out;
+`mix:check` models the v2 mix. Check without rendering: `npm run mix:check -- <slug>`.
 
 ## Before you say you're done
 

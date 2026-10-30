@@ -10,11 +10,12 @@ import { Soundtrack } from "../components/Soundtrack";
 import { SceneView } from "../components/SceneView";
 import { migrateV1toV2 } from "../lib/migrate";
 import { validateProject } from "../lib/scenes";
+import { captionFaceHits } from "../motion/captionCheck";
 import { resolveScene } from "../motion/resolveScene";
-import { placeCues } from "../lib/cues";
+import { assertGapsFilled, BED, musicDbAt, placeCues, runtimeProblem } from "../lib/cues";
 import { CUES } from "./ice-king.cues";
 import { parseEpisode, parseWords } from "../lib/shots";
-import { computeTimings, totalFrames } from "../lib/timing";
+import { computeTimings, onePerSentence, totalFrames } from "../lib/timing";
 
 export const episode = parseEpisode(shotsJson);
 export const words = parseWords(wordsJson);
@@ -101,8 +102,19 @@ export const cues = placeCues(timings, CUES);
 const emphasis = new Set(timings.flatMap((t) => (t.emphasisWord === null ? [] : [t.emphasisWord])));
 
 // Motion v2: the shot list migrated to v1.1 scenes (one continuous take per set run).
-export const project = validateProject(migrateV1toV2(episode, words, LAYOUT));
+const TARGET_SEC = 60;
+const CAPTION_Y = 0.7;
+export const project = validateProject(migrateV1toV2(episode, words, LAYOUT, TARGET_SEC));
 const scenes = project.scenes.map((_, i) => resolveScene(project, i, episode.fps));
+const emphasisV2 = onePerSentence(words, emphasis);
+const musicV2 = musicDbAt(words, episode.fps);
+assertGapsFilled(words, BED);
+// Warnings, not failures (the user's call): an over-long script and captions over faces.
+const runtime = runtimeProblem(timings, words, TARGET_SEC);
+if (runtime) console.warn(`[ice-king v2] ${runtime}`);
+for (const h of scenes.flatMap((s) => captionFaceHits(s, project.vo.words, episode.fps, episode.width, episode.height, CAPTION_Y))) {
+  console.warn(`[ice-king v2] caption over ${h.cast}'s face in ${h.scene}: words ${h.words[0]}–${h.words[h.words.length - 1]} ("${h.text.slice(0, 4).join(" ")}…")`);
+}
 
 export const IceKing: React.FC<{ motion: MotionVersion }> = ({ motion }) => (
   <AbsoluteFill
@@ -121,7 +133,16 @@ export const IceKing: React.FC<{ motion: MotionVersion }> = ({ motion }) => (
           <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} />
         </Sequence>
       ))}
-    <Captions words={words} emphasis={emphasis} />
-    <Soundtrack voice={VOICE} music={MUSIC} cues={cues} />
+    {motion === "v2" ? (
+      <>
+        <Captions words={words} emphasis={emphasisV2} yRatio={CAPTION_Y} />
+        <Soundtrack voice={VOICE} music={MUSIC} cues={cues} musicDbAt={musicV2} bed={BED} />
+      </>
+    ) : (
+      <>
+        <Captions words={words} emphasis={emphasis} />
+        <Soundtrack voice={VOICE} music={MUSIC} cues={cues} />
+      </>
+    )}
   </AbsoluteFill>
 );

@@ -76,3 +76,17 @@ export const resolveAt = (at: StartAt | undefined, timing: ShotTiming): number =
   if (!w) throw new Error(`Shot ${timing.shot.id}: word "${at.word}" is not spoken in this shot`);
   return w.start + (at.offset ?? 0);
 };
+
+/** Keeps at most one caption emphasis word per sentence (the first); sentences end on . ? ! */
+export const onePerSentence = (words: Word[], emphasis: Set<number>) => {
+  const out = new Set<number>();
+  let used = false;
+  words.forEach((w, i) => {
+    if (emphasis.has(i) && !used) {
+      out.add(i);
+      used = true;
+    }
+    if (/[.?!]["”']?$/.test(w.text)) used = false;
+  });
+  return out;
+};

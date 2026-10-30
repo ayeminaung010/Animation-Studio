@@ -1,7 +1,19 @@
 // Pure cue-sheet logic (no React), shared by the composition and tools/dump-cues.ts.
-import { resolveAt, type ShotTiming, type StartAt } from "./timing";
+import type { Word } from "./shots";
+import { msToFrame, resolveAt, type ShotTiming, type StartAt } from "./timing";
 
 export const MUSIC_DB = -21;
+/** Motion v2: music rises this much (dB) above MUSIC_DB when nobody talks, ducking back under the voice. */
+export const DUCK_DB = 12;
+/** Duck envelope in frames: dip starts `attack` before a word, holds `hold` after it, recovers over `release`. */
+const DUCK = { attack: 4, hold: 12, release: 18 };
+/**
+ * Motion v2: a room-tone loop under the whole mix so the audio never drops out (QA: no gaps > 0.25 s
+ * below −45 dB). room-tone.wav is ≈ −30 dBFS RMS; at −10 dB it sits ≈ 22 dB under the voice.
+ */
+export const BED = { name: "room-tone", db: -10 };
+/** Pauses in the voice longer than this must be filled by the bed (or fail the build). */
+export const MAX_VO_GAP_SEC = 0.25;
 /** Whole-mix trim so peaks stay under −1 dBFS. Levels below are relative to the voice (0 dB). */
 export const MASTER_DB = -2.8; // includes ~0.6 dB headroom for AAC overshoot
 
@@ -102,3 +114,50 @@ export const placeCues = (timings: ShotTiming[], sheet: CueSheet): PlacedCue[] =
   return out;
 };
 
+
+/** Music level (dB, before MASTER_DB) per frame: MUSIC_DB under the voice, + DUCK_DB in real pauses. */
+export const musicDbAt = (words: Word[], fps: number) => {
+  const spans = words.map((w) => [msToFrame(w.startMs, fps), msToFrame(w.endMs, fps)]);
+  return (f: number) => {
+    let depth = 0;
+    for (const [a, b] of spans) {
+      if (f < a - DUCK.attack) break;
+      const d = f < a ? (f - (a - DUCK.attack)) / DUCK.attack
+        : f <= b + DUCK.hold ? 1
+          : 1 - (f - b - DUCK.hold) / DUCK.release;
+      depth = Math.max(depth, d);
+    }
+    return MUSIC_DB + DUCK_DB * (1 - Math.min(1, Math.max(0, depth)));
+  };
+};
+
+/** Silences in the voice longer than MAX_VO_GAP_SEC (seconds: start, length). */
+export const voGaps = (words: Word[]) =>
+  words.slice(1)
+    .map((w, i) => ({ at: words[i].endMs / 1000, len: (w.startMs - words[i].endMs) / 1000 }))
+    .filter((g) => g.len > MAX_VO_GAP_SEC);
+
+/** Fails the build when the voice has gaps and nothing continuous plays under them. */
+export const assertGapsFilled = (words: Word[], bed: typeof BED | null) => {
+  const gaps = voGaps(words);
+  if (gaps.length && !bed) {
+    throw new Error(`Voice has ${gaps.length} gaps over ${MAX_VO_GAP_SEC}s (first at ${gaps[0].at.toFixed(1)}s) and no ambience bed to fill them`);
+  }
+  return gaps;
+};
+
+/**
+ * Runtime against the target. Returns a message when the voice runs over target × 1.05, naming how many
+ * words to cut and the two longest beats to cut them from (we never time-stretch the voice).
+ */
+export const runtimeProblem = (timings: ShotTiming[], words: Word[], targetSec: number) => {
+  const sec = (words[words.length - 1].endMs - words[0].startMs) / 1000;
+  if (sec <= targetSec * 1.05) return null;
+  const wps = words.length / sec;
+  const trim = Math.ceil((sec - targetSec) * wps);
+  const beats = new Map<string, number>();
+  for (const t of timings) beats.set(t.shot.beat, (beats.get(t.shot.beat) ?? 0) + t.durationInFrames);
+  const longest = [...beats.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([b]) => b);
+  return `Runtime ${sec.toFixed(1)} s is ${Math.round((sec / targetSec - 1) * 100)}% over the ${targetSec} s target: ` +
+    `trim ~${trim} words (longest beats: ${longest.join(", ")}) and re-voice. The voice is never time-stretched.`;
+};

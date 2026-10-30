@@ -1,9 +1,11 @@
 // Checks for the v1.1 contract: migration, validator, scene resolver (run: npm test).
 // Uses a small fixture episode: Ice King's episode file loads fonts on import, which fails in node.
 import assert from "node:assert/strict";
+import { assertGapsFilled, BED, musicDbAt, MUSIC_DB, runtimeProblem } from "../src/lib/cues";
 import { migrateV1toV2 } from "../src/lib/migrate";
 import { isHardCut, validateProject, type ProjectV11 } from "../src/lib/scenes";
 import type { Episode, Shot, Word } from "../src/lib/shots";
+import { computeTimings, onePerSentence } from "../src/lib/timing";
 import { resolveScene } from "../src/motion/resolveScene";
 
 const FPS = 30;
@@ -67,5 +69,26 @@ broken((q) => { q.scenes[1].fromWord = 9; }, /contiguous/);
 broken((q) => { q.scenes[0].performances = q.scenes[0].performances.filter((x) => x.cast !== "cast.pal"); }, /cast.pal is in frame .* no performance/);
 broken((q) => { q.scenes[0].performances[0].gestures = [{ atWord: 2, pose: "moonwalk" as never }]; }, /unknown gesture/);
 broken((q) => { q.scenes[0].performances[0].gaze = [{ atWord: 30, target: "camera" }]; }, /outside 0–7/);
+
+// Audio: music sits at MUSIC_DB under words, rises 12 dB only in real pauses (not 0.3 s gaps).
+const talk: Word[] = [
+  { text: "a", startMs: 1000, endMs: 1500 }, { text: "b.", startMs: 1800, endMs: 2300 }, { text: "c", startMs: 5000, endMs: 5500 },
+];
+const duck = musicDbAt(talk, FPS);
+assert.equal(duck(36), MUSIC_DB, "music should duck under a word");
+assert.equal(duck(50), MUSIC_DB, "a 0.3 s gap (frames 45–54) should not pump the music");
+assert.equal(duck(110), MUSIC_DB + 12, "music should come up in a long pause");
+assert.ok(duck(148) < MUSIC_DB + 12, "music should dip before the next word starts");
+assert.throws(() => assertGapsFilled(talk, null), /gaps over 0.25s/);
+assert.equal(assertGapsFilled(talk, BED).length, 2);
+
+// Runtime: 24 s against a 20 s target is over; against 60 s it isn't.
+const tm = computeTimings(episode.shots, words, FPS);
+assert.match(runtimeProblem(tm, words, 20) ?? "", /over the 20 s target: trim ~\d+ words/);
+assert.equal(runtimeProblem(tm, words, 60), null);
+
+// Captions: one yellow word per sentence.
+const sentences: Word[] = ["One", "big", "day.", "Two", "more"].map((text, i) => ({ text, startMs: i * 300, endMs: i * 300 + 200 }));
+assert.deepEqual([...onePerSentence(sentences, new Set([0, 2, 3, 4]))], [0, 3]);
 
 console.log("scene tests: all passed");

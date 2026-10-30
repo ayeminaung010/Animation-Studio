@@ -39,7 +39,15 @@ def main():
     voice[: len(v)] = v * g(master)
     bed = np.zeros(n)
     m = load(d["music"])[:n]
-    bed[: len(m)] += m * g(master + d["musicDb"])
+    if "musicDbPerFrame" in d:  # v2: per-frame ducking, held flat within each frame
+        per = np.array(d["musicDbPerFrame"])
+        idx = np.minimum((np.arange(len(m)) / SR * fps).astype(int), len(per) - 1)
+        bed[: len(m)] += m * g(master + per[idx])
+    else:
+        bed[: len(m)] += m * g(master + d["musicDb"])
+    if d.get("bed"):  # v2: looped ambience under everything
+        b = load(d["bed"]["path"])
+        bed += np.resize(b, n) * g(master + d["bed"]["db"])
     for c in d["cues"]:
         x = load(f"public/audio/sfx/{c['name']}.wav")
         if c.get("durationInFrames"):
