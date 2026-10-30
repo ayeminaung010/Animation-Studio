@@ -1,0 +1,1278 @@
+{
+ "text": "He is loading a whole ship with ice and sailing it somewhere hot. Every sailor on the dock is laughing. Ice to the tropics? It'll be soup before you leave the harbor. The captain shakes his head. Who in a hot country even wants ice? He just smiles and pats a sack of sawdust. Far away on a hot island, his buddy is building a strange house. The walls are twice as thick as normal. No windows, just one small door and piles of sawdust inside. The trip takes weeks. Every day it gets hotter and every day the crew checks the hold. Drip, drip, drip. Hey iceman, should we sell your cargo by the cup? It's so hot the cook fries eggs on the deck, but he isn't worried. He just keeps the hatch shut tight and waits. The ship lands and the ice is still solid, but the bar owners just shrug. Our drinks are warm, our beds are warm, we like warm. So he does something crazier. He gives the ice away for free. You see, sawdust is full of tiny pockets of air and air is terrible at carrying heat. It's the same trick a picnic cooler uses today. Pack tight big blocks last for months even under a tropical sun. One taste of an ice-cold drink in the heat and the whole town is hooked. Every bar wants ice every day. He builds more ice houses, more ships, more ice. Now everyone who laughed is buying his ice.",
+ "language": "en",
+ "provider": "gemini",
+ "model": "gemini-3.5-transcribe",
+ "words": [
+  {
+   "text": "He",
+   "start_ms": 700,
+   "end_ms": 800
+  },
+  {
+   "text": "is",
+   "start_ms": 800,
+   "end_ms": 900
+  },
+  {
+   "text": "loading",
+   "start_ms": 900,
+   "end_ms": 1200
+  },
+  {
+   "text": "a",
+   "start_ms": 1200,
+   "end_ms": 1200
+  },
+  {
+   "text": "whole",
+   "start_ms": 1200,
+   "end_ms": 1600
+  },
+  {
+   "text": "ship",
+   "start_ms": 1600,
+   "end_ms": 1800
+  },
+  {
+   "text": "with",
+   "start_ms": 1800,
+   "end_ms": 2100
+  },
+  {
+   "text": "ice",
+   "start_ms": 2100,
+   "end_ms": 2600
+  },
+  {
+   "text": "and",
+   "start_ms": 2700,
+   "end_ms": 2800
+  },
+  {
+   "text": "sailing",
+   "start_ms": 2800,
+   "end_ms": 3200
+  },
+  {
+   "text": "it",
+   "start_ms": 3200,
+   "end_ms": 3400
+  },
+  {
+   "text": "somewhere",
+   "start_ms": 3400,
+   "end_ms": 3800
+  },
+  {
+   "text": "hot.",
+   "start_ms": 3800,
+   "end_ms": 4300
+  },
+  {
+   "text": "Every",
+   "start_ms": 4500,
+   "end_ms": 4700
+  },
+  {
+   "text": "sailor",
+   "start_ms": 4700,
+   "end_ms": 5100
+  },
+  {
+   "text": "on",
+   "start_ms": 5100,
+   "end_ms": 5200
+  },
+  {
+   "text": "the",
+   "start_ms": 5200,
+   "end_ms": 5300
+  },
+  {
+   "text": "dock",
+   "start_ms": 5300,
+   "end_ms": 5600
+  },
+  {
+   "text": "is",
+   "start_ms": 5600,
+   "end_ms": 5700
+  },
+  {
+   "text": "laughing.",
+   "start_ms": 5700,
+   "end_ms": 6200
+  },
+  {
+   "text": "Ice",
+   "start_ms": 6500,
+   "end_ms": 6900
+  },
+  {
+   "text": "to",
+   "start_ms": 6900,
+   "end_ms": 7000
+  },
+  {
+   "text": "the",
+   "start_ms": 7000,
+   "end_ms": 7100
+  },
+  {
+   "text": "tropics?",
+   "start_ms": 7100,
+   "end_ms": 7700
+  },
+  {
+   "text": "It'll",
+   "start_ms": 7900,
+   "end_ms": 8000
+  },
+  {
+   "text": "be",
+   "start_ms": 8000,
+   "end_ms": 8200
+  },
+  {
+   "text": "soup",
+   "start_ms": 8200,
+   "end_ms": 8500
+  },
+  {
+   "text": "before",
+   "start_ms": 8500,
+   "end_ms": 8800
+  },
+  {
+   "text": "you",
+   "start_ms": 8800,
+   "end_ms": 8900
+  },
+  {
+   "text": "leave",
+   "start_ms": 8900,
+   "end_ms": 9100
+  },
+  {
+   "text": "the",
+   "start_ms": 9100,
+   "end_ms": 9200
+  },
+  {
+   "text": "harbor.",
+   "start_ms": 9200,
+   "end_ms": 9500
+  },
+  {
+   "text": "The",
+   "start_ms": 10100,
+   "end_ms": 10200
+  },
+  {
+   "text": "captain",
+   "start_ms": 10200,
+   "end_ms": 10500
+  },
+  {
+   "text": "shakes",
+   "start_ms": 10500,
+   "end_ms": 10800
+  },
+  {
+   "text": "his",
+   "start_ms": 10800,
+   "end_ms": 10900
+  },
+  {
+   "text": "head.",
+   "start_ms": 10900,
+   "end_ms": 11300
+  },
+  {
+   "text": "Who",
+   "start_ms": 11500,
+   "end_ms": 11600
+  },
+  {
+   "text": "in",
+   "start_ms": 11600,
+   "end_ms": 11700
+  },
+  {
+   "text": "a",
+   "start_ms": 11700,
+   "end_ms": 11700
+  },
+  {
+   "text": "hot",
+   "start_ms": 11700,
+   "end_ms": 12000
+  },
+  {
+   "text": "country",
+   "start_ms": 12000,
+   "end_ms": 12400
+  },
+  {
+   "text": "even",
+   "start_ms": 12400,
+   "end_ms": 12600
+  },
+  {
+   "text": "wants",
+   "start_ms": 12600,
+   "end_ms": 13000
+  },
+  {
+   "text": "ice?",
+   "start_ms": 13000,
+   "end_ms": 13400
+  },
+  {
+   "text": "He",
+   "start_ms": 13600,
+   "end_ms": 13700
+  },
+  {
+   "text": "just",
+   "start_ms": 13700,
+   "end_ms": 13900
+  },
+  {
+   "text": "smiles",
+   "start_ms": 13900,
+   "end_ms": 14500
+  },
+  {
+   "text": "and",
+   "start_ms": 14600,
+   "end_ms": 14800
+  },
+  {
+   "text": "pats",
+   "start_ms": 14800,
+   "end_ms": 15000
+  },
+  {
+   "text": "a",
+   "start_ms": 15000,
+   "end_ms": 15100
+  },
+  {
+   "text": "sack",
+   "start_ms": 15100,
+   "end_ms": 15400
+  },
+  {
+   "text": "of",
+   "start_ms": 15400,
+   "end_ms": 15500
+  },
+  {
+   "text": "sawdust.",
+   "start_ms": 15500,
+   "end_ms": 16100
+  },
+  {
+   "text": "Far",
+   "start_ms": 16400,
+   "end_ms": 16600
+  },
+  {
+   "text": "away",
+   "start_ms": 16600,
+   "end_ms": 17000
+  },
+  {
+   "text": "on",
+   "start_ms": 17100,
+   "end_ms": 17200
+  },
+  {
+   "text": "a",
+   "start_ms": 17200,
+   "end_ms": 17300
+  },
+  {
+   "text": "hot",
+   "start_ms": 17300,
+   "end_ms": 17500
+  },
+  {
+   "text": "island,",
+   "start_ms": 17500,
+   "end_ms": 18000
+  },
+  {
+   "text": "his",
+   "start_ms": 18100,
+   "end_ms": 18300
+  },
+  {
+   "text": "buddy",
+   "start_ms": 18300,
+   "end_ms": 18500
+  },
+  {
+   "text": "is",
+   "start_ms": 18500,
+   "end_ms": 18600
+  },
+  {
+   "text": "building",
+   "start_ms": 18600,
+   "end_ms": 18900
+  },
+  {
+   "text": "a",
+   "start_ms": 18900,
+   "end_ms": 19000
+  },
+  {
+   "text": "strange",
+   "start_ms": 19000,
+   "end_ms": 19400
+  },
+  {
+   "text": "house.",
+   "start_ms": 19400,
+   "end_ms": 19700
+  },
+  {
+   "text": "The",
+   "start_ms": 20200,
+   "end_ms": 20300
+  },
+  {
+   "text": "walls",
+   "start_ms": 20300,
+   "end_ms": 20600
+  },
+  {
+   "text": "are",
+   "start_ms": 20600,
+   "end_ms": 20700
+  },
+  {
+   "text": "twice",
+   "start_ms": 20700,
+   "end_ms": 21000
+  },
+  {
+   "text": "as",
+   "start_ms": 21000,
+   "end_ms": 21200
+  },
+  {
+   "text": "thick",
+   "start_ms": 21200,
+   "end_ms": 21300
+  },
+  {
+   "text": "as",
+   "start_ms": 21300,
+   "end_ms": 21500
+  },
+  {
+   "text": "normal.",
+   "start_ms": 21500,
+   "end_ms": 21900
+  },
+  {
+   "text": "No",
+   "start_ms": 22200,
+   "end_ms": 22400
+  },
+  {
+   "text": "windows,",
+   "start_ms": 22400,
+   "end_ms": 22900
+  },
+  {
+   "text": "just",
+   "start_ms": 23200,
+   "end_ms": 23400
+  },
+  {
+   "text": "one",
+   "start_ms": 23400,
+   "end_ms": 23700
+  },
+  {
+   "text": "small",
+   "start_ms": 23700,
+   "end_ms": 23900
+  },
+  {
+   "text": "door",
+   "start_ms": 23900,
+   "end_ms": 24300
+  },
+  {
+   "text": "and",
+   "start_ms": 24500,
+   "end_ms": 24700
+  },
+  {
+   "text": "piles",
+   "start_ms": 24700,
+   "end_ms": 25000
+  },
+  {
+   "text": "of",
+   "start_ms": 25000,
+   "end_ms": 25100
+  },
+  {
+   "text": "sawdust",
+   "start_ms": 25100,
+   "end_ms": 25600
+  },
+  {
+   "text": "inside.",
+   "start_ms": 25600,
+   "end_ms": 26200
+  },
+  {
+   "text": "The",
+   "start_ms": 26600,
+   "end_ms": 26600
+  },
+  {
+   "text": "trip",
+   "start_ms": 26600,
+   "end_ms": 26900
+  },
+  {
+   "text": "takes",
+   "start_ms": 26900,
+   "end_ms": 27200
+  },
+  {
+   "text": "weeks.",
+   "start_ms": 27200,
+   "end_ms": 27700
+  },
+  {
+   "text": "Every",
+   "start_ms": 28100,
+   "end_ms": 28400
+  },
+  {
+   "text": "day",
+   "start_ms": 28400,
+   "end_ms": 28600
+  },
+  {
+   "text": "it",
+   "start_ms": 28600,
+   "end_ms": 28700
+  },
+  {
+   "text": "gets",
+   "start_ms": 28700,
+   "end_ms": 28900
+  },
+  {
+   "text": "hotter",
+   "start_ms": 28900,
+   "end_ms": 29300
+  },
+  {
+   "text": "and",
+   "start_ms": 29500,
+   "end_ms": 29700
+  },
+  {
+   "text": "every",
+   "start_ms": 29700,
+   "end_ms": 30000
+  },
+  {
+   "text": "day",
+   "start_ms": 30000,
+   "end_ms": 30200
+  },
+  {
+   "text": "the",
+   "start_ms": 30200,
+   "end_ms": 30300
+  },
+  {
+   "text": "crew",
+   "start_ms": 30300,
+   "end_ms": 30600
+  },
+  {
+   "text": "checks",
+   "start_ms": 30600,
+   "end_ms": 30900
+  },
+  {
+   "text": "the",
+   "start_ms": 30900,
+   "end_ms": 31000
+  },
+  {
+   "text": "hold.",
+   "start_ms": 31000,
+   "end_ms": 31400
+  },
+  {
+   "text": "Drip,",
+   "start_ms": 31700,
+   "end_ms": 32100
+  },
+  {
+   "text": "drip,",
+   "start_ms": 32300,
+   "end_ms": 32800
+  },
+  {
+   "text": "drip.",
+   "start_ms": 32900,
+   "end_ms": 33500
+  },
+  {
+   "text": "Hey",
+   "start_ms": 33600,
+   "end_ms": 33700
+  },
+  {
+   "text": "ice",
+   "start_ms": 33700,
+   "end_ms": 34000
+  },
+  {
+   "text": "man",
+   "start_ms": 34000,
+   "end_ms": 34300
+  },
+  {
+   "text": "should",
+   "start_ms": 34500,
+   "end_ms": 34600
+  },
+  {
+   "text": "we",
+   "start_ms": 34600,
+   "end_ms": 34700
+  },
+  {
+   "text": "sell",
+   "start_ms": 34700,
+   "end_ms": 34900
+  },
+  {
+   "text": "your",
+   "start_ms": 34900,
+   "end_ms": 35100
+  },
+  {
+   "text": "cargo",
+   "start_ms": 35100,
+   "end_ms": 35400
+  },
+  {
+   "text": "by",
+   "start_ms": 35400,
+   "end_ms": 35600
+  },
+  {
+   "text": "the",
+   "start_ms": 35600,
+   "end_ms": 35700
+  },
+  {
+   "text": "cup?",
+   "start_ms": 35700,
+   "end_ms": 36000
+  },
+  {
+   "text": "It's",
+   "start_ms": 36500,
+   "end_ms": 36600
+  },
+  {
+   "text": "so",
+   "start_ms": 36600,
+   "end_ms": 36800
+  },
+  {
+   "text": "hot",
+   "start_ms": 36800,
+   "end_ms": 37100
+  },
+  {
+   "text": "the",
+   "start_ms": 37100,
+   "end_ms": 37200
+  },
+  {
+   "text": "cook",
+   "start_ms": 37200,
+   "end_ms": 37500
+  },
+  {
+   "text": "fries",
+   "start_ms": 37500,
+   "end_ms": 37800
+  },
+  {
+   "text": "eggs",
+   "start_ms": 37800,
+   "end_ms": 38100
+  },
+  {
+   "text": "on",
+   "start_ms": 38100,
+   "end_ms": 38200
+  },
+  {
+   "text": "the",
+   "start_ms": 38200,
+   "end_ms": 38300
+  },
+  {
+   "text": "deck,",
+   "start_ms": 38300,
+   "end_ms": 38700
+  },
+  {
+   "text": "but",
+   "start_ms": 38900,
+   "end_ms": 39000
+  },
+  {
+   "text": "he",
+   "start_ms": 39000,
+   "end_ms": 39200
+  },
+  {
+   "text": "isn't",
+   "start_ms": 39200,
+   "end_ms": 39400
+  },
+  {
+   "text": "worried.",
+   "start_ms": 39400,
+   "end_ms": 39800
+  },
+  {
+   "text": "He",
+   "start_ms": 40000,
+   "end_ms": 40200
+  },
+  {
+   "text": "just",
+   "start_ms": 40200,
+   "end_ms": 40400
+  },
+  {
+   "text": "keeps",
+   "start_ms": 40400,
+   "end_ms": 40600
+  },
+  {
+   "text": "the",
+   "start_ms": 40600,
+   "end_ms": 40800
+  },
+  {
+   "text": "hatch",
+   "start_ms": 40800,
+   "end_ms": 41100
+  },
+  {
+   "text": "shut",
+   "start_ms": 41100,
+   "end_ms": 41300
+  },
+  {
+   "text": "tight",
+   "start_ms": 41300,
+   "end_ms": 41800
+  },
+  {
+   "text": "and",
+   "start_ms": 42000,
+   "end_ms": 42200
+  },
+  {
+   "text": "waits.",
+   "start_ms": 42200,
+   "end_ms": 42600
+  },
+  {
+   "text": "The",
+   "start_ms": 43000,
+   "end_ms": 43100
+  },
+  {
+   "text": "ship",
+   "start_ms": 43100,
+   "end_ms": 43400
+  },
+  {
+   "text": "lands",
+   "start_ms": 43400,
+   "end_ms": 43900
+  },
+  {
+   "text": "and",
+   "start_ms": 44000,
+   "end_ms": 44100
+  },
+  {
+   "text": "the",
+   "start_ms": 44100,
+   "end_ms": 44200
+  },
+  {
+   "text": "ice",
+   "start_ms": 44200,
+   "end_ms": 44400
+  },
+  {
+   "text": "is",
+   "start_ms": 44400,
+   "end_ms": 44500
+  },
+  {
+   "text": "still",
+   "start_ms": 44500,
+   "end_ms": 44700
+  },
+  {
+   "text": "solid,",
+   "start_ms": 44700,
+   "end_ms": 45300
+  },
+  {
+   "text": "but",
+   "start_ms": 45400,
+   "end_ms": 45500
+  },
+  {
+   "text": "the",
+   "start_ms": 45500,
+   "end_ms": 45600
+  },
+  {
+   "text": "bar",
+   "start_ms": 45600,
+   "end_ms": 45800
+  },
+  {
+   "text": "owners",
+   "start_ms": 45800,
+   "end_ms": 46100
+  },
+  {
+   "text": "just",
+   "start_ms": 46100,
+   "end_ms": 46300
+  },
+  {
+   "text": "shrug.",
+   "start_ms": 46300,
+   "end_ms": 46700
+  },
+  {
+   "text": "Our",
+   "start_ms": 47100,
+   "end_ms": 47200
+  },
+  {
+   "text": "drinks",
+   "start_ms": 47200,
+   "end_ms": 47500
+  },
+  {
+   "text": "are",
+   "start_ms": 47500,
+   "end_ms": 47600
+  },
+  {
+   "text": "warm,",
+   "start_ms": 47600,
+   "end_ms": 48100
+  },
+  {
+   "text": "our",
+   "start_ms": 48300,
+   "end_ms": 48400
+  },
+  {
+   "text": "beds",
+   "start_ms": 48400,
+   "end_ms": 48700
+  },
+  {
+   "text": "are",
+   "start_ms": 48700,
+   "end_ms": 48800
+  },
+  {
+   "text": "warm,",
+   "start_ms": 48800,
+   "end_ms": 49200
+  },
+  {
+   "text": "we",
+   "start_ms": 49400,
+   "end_ms": 49600
+  },
+  {
+   "text": "like",
+   "start_ms": 49600,
+   "end_ms": 49900
+  },
+  {
+   "text": "warm.",
+   "start_ms": 49900,
+   "end_ms": 50300
+  },
+  {
+   "text": "So",
+   "start_ms": 51100,
+   "end_ms": 51200
+  },
+  {
+   "text": "he",
+   "start_ms": 51200,
+   "end_ms": 51300
+  },
+  {
+   "text": "does",
+   "start_ms": 51300,
+   "end_ms": 51500
+  },
+  {
+   "text": "something",
+   "start_ms": 51500,
+   "end_ms": 51800
+  },
+  {
+   "text": "crazier.",
+   "start_ms": 51800,
+   "end_ms": 52400
+  },
+  {
+   "text": "He",
+   "start_ms": 52500,
+   "end_ms": 52700
+  },
+  {
+   "text": "gives",
+   "start_ms": 52700,
+   "end_ms": 53000
+  },
+  {
+   "text": "the",
+   "start_ms": 53000,
+   "end_ms": 53200
+  },
+  {
+   "text": "ice",
+   "start_ms": 53200,
+   "end_ms": 53300
+  },
+  {
+   "text": "away",
+   "start_ms": 53300,
+   "end_ms": 53800
+  },
+  {
+   "text": "for",
+   "start_ms": 54000,
+   "end_ms": 54200
+  },
+  {
+   "text": "free.",
+   "start_ms": 54200,
+   "end_ms": 54500
+  },
+  {
+   "text": "You",
+   "start_ms": 55100,
+   "end_ms": 55200
+  },
+  {
+   "text": "see,",
+   "start_ms": 55200,
+   "end_ms": 55600
+  },
+  {
+   "text": "sawdust",
+   "start_ms": 55700,
+   "end_ms": 56200
+  },
+  {
+   "text": "is",
+   "start_ms": 56200,
+   "end_ms": 56400
+  },
+  {
+   "text": "full",
+   "start_ms": 56400,
+   "end_ms": 56600
+  },
+  {
+   "text": "of",
+   "start_ms": 56600,
+   "end_ms": 56700
+  },
+  {
+   "text": "tiny",
+   "start_ms": 56700,
+   "end_ms": 57000
+  },
+  {
+   "text": "pockets",
+   "start_ms": 57000,
+   "end_ms": 57400
+  },
+  {
+   "text": "of",
+   "start_ms": 57400,
+   "end_ms": 57500
+  },
+  {
+   "text": "air",
+   "start_ms": 57500,
+   "end_ms": 57800
+  },
+  {
+   "text": "and",
+   "start_ms": 58000,
+   "end_ms": 58200
+  },
+  {
+   "text": "air",
+   "start_ms": 58200,
+   "end_ms": 58500
+  },
+  {
+   "text": "is",
+   "start_ms": 58500,
+   "end_ms": 58600
+  },
+  {
+   "text": "terrible",
+   "start_ms": 58600,
+   "end_ms": 59100
+  },
+  {
+   "text": "at",
+   "start_ms": 59100,
+   "end_ms": 59200
+  },
+  {
+   "text": "carrying",
+   "start_ms": 59200,
+   "end_ms": 59600
+  },
+  {
+   "text": "heat.",
+   "start_ms": 59600,
+   "end_ms": 59900
+  },
+  {
+   "text": "It's",
+   "start_ms": 60200,
+   "end_ms": 60400
+  },
+  {
+   "text": "the",
+   "start_ms": 60400,
+   "end_ms": 60500
+  },
+  {
+   "text": "same",
+   "start_ms": 60500,
+   "end_ms": 60800
+  },
+  {
+   "text": "trick",
+   "start_ms": 60800,
+   "end_ms": 61000
+  },
+  {
+   "text": "a",
+   "start_ms": 61000,
+   "end_ms": 61100
+  },
+  {
+   "text": "picnic",
+   "start_ms": 61100,
+   "end_ms": 61500
+  },
+  {
+   "text": "cooler",
+   "start_ms": 61500,
+   "end_ms": 61800
+  },
+  {
+   "text": "uses",
+   "start_ms": 61800,
+   "end_ms": 62100
+  },
+  {
+   "text": "today.",
+   "start_ms": 62100,
+   "end_ms": 62600
+  },
+  {
+   "text": "Pack",
+   "start_ms": 62900,
+   "end_ms": 63100
+  },
+  {
+   "text": "tight",
+   "start_ms": 63100,
+   "end_ms": 63500
+  },
+  {
+   "text": "big",
+   "start_ms": 63500,
+   "end_ms": 63700
+  },
+  {
+   "text": "blocks",
+   "start_ms": 63700,
+   "end_ms": 64100
+  },
+  {
+   "text": "last",
+   "start_ms": 64100,
+   "end_ms": 64400
+  },
+  {
+   "text": "for",
+   "start_ms": 64400,
+   "end_ms": 64500
+  },
+  {
+   "text": "months",
+   "start_ms": 64500,
+   "end_ms": 64900
+  },
+  {
+   "text": "even",
+   "start_ms": 65200,
+   "end_ms": 65400
+  },
+  {
+   "text": "under",
+   "start_ms": 65400,
+   "end_ms": 65600
+  },
+  {
+   "text": "a",
+   "start_ms": 65600,
+   "end_ms": 65700
+  },
+  {
+   "text": "tropical",
+   "start_ms": 65700,
+   "end_ms": 66100
+  },
+  {
+   "text": "sun.",
+   "start_ms": 66100,
+   "end_ms": 66500
+  },
+  {
+   "text": "One",
+   "start_ms": 66900,
+   "end_ms": 67200
+  },
+  {
+   "text": "taste",
+   "start_ms": 67200,
+   "end_ms": 67500
+  },
+  {
+   "text": "of",
+   "start_ms": 67500,
+   "end_ms": 67600
+  },
+  {
+   "text": "an",
+   "start_ms": 67600,
+   "end_ms": 67700
+  },
+  {
+   "text": "ice-cold",
+   "start_ms": 67700,
+   "end_ms": 68100
+  },
+  {
+   "text": "drink",
+   "start_ms": 68100,
+   "end_ms": 68400
+  },
+  {
+   "text": "in",
+   "start_ms": 68400,
+   "end_ms": 68400
+  },
+  {
+   "text": "the",
+   "start_ms": 68400,
+   "end_ms": 68500
+  },
+  {
+   "text": "heat",
+   "start_ms": 68500,
+   "end_ms": 68900
+  },
+  {
+   "text": "and",
+   "start_ms": 69200,
+   "end_ms": 69300
+  },
+  {
+   "text": "the",
+   "start_ms": 69300,
+   "end_ms": 69300
+  },
+  {
+   "text": "whole",
+   "start_ms": 69300,
+   "end_ms": 69600
+  },
+  {
+   "text": "town",
+   "start_ms": 69600,
+   "end_ms": 69800
+  },
+  {
+   "text": "is",
+   "start_ms": 69800,
+   "end_ms": 69900
+  },
+  {
+   "text": "hooked.",
+   "start_ms": 69900,
+   "end_ms": 70300
+  },
+  {
+   "text": "Every",
+   "start_ms": 70700,
+   "end_ms": 71000
+  },
+  {
+   "text": "bar",
+   "start_ms": 71000,
+   "end_ms": 71200
+  },
+  {
+   "text": "wants",
+   "start_ms": 71200,
+   "end_ms": 71500
+  },
+  {
+   "text": "ice",
+   "start_ms": 71500,
+   "end_ms": 71900
+  },
+  {
+   "text": "every",
+   "start_ms": 72100,
+   "end_ms": 72400
+  },
+  {
+   "text": "day.",
+   "start_ms": 72400,
+   "end_ms": 72800
+  },
+  {
+   "text": "He",
+   "start_ms": 73000,
+   "end_ms": 73100
+  },
+  {
+   "text": "builds",
+   "start_ms": 73100,
+   "end_ms": 73400
+  },
+  {
+   "text": "more",
+   "start_ms": 73400,
+   "end_ms": 73700
+  },
+  {
+   "text": "ice",
+   "start_ms": 73700,
+   "end_ms": 73800
+  },
+  {
+   "text": "houses,",
+   "start_ms": 73800,
+   "end_ms": 74300
+  },
+  {
+   "text": "more",
+   "start_ms": 74500,
+   "end_ms": 74700
+  },
+  {
+   "text": "ships,",
+   "start_ms": 74700,
+   "end_ms": 75200
+  },
+  {
+   "text": "more",
+   "start_ms": 75300,
+   "end_ms": 75600
+  },
+  {
+   "text": "ice.",
+   "start_ms": 75600,
+   "end_ms": 76000
+  },
+  {
+   "text": "Now",
+   "start_ms": 76300,
+   "end_ms": 76600
+  },
+  {
+   "text": "everyone",
+   "start_ms": 76600,
+   "end_ms": 77000
+  },
+  {
+   "text": "who",
+   "start_ms": 77000,
+   "end_ms": 77200
+  },
+  {
+   "text": "laughed",
+   "start_ms": 77200,
+   "end_ms": 77600
+  },
+  {
+   "text": "is",
+   "start_ms": 77700,
+   "end_ms": 77900
+  },
+  {
+   "text": "buying",
+   "start_ms": 77900,
+   "end_ms": 78100
+  },
+  {
+   "text": "his",
+   "start_ms": 78100,
+   "end_ms": 78300
+  },
+  {
+   "text": "ice.",
+   "start_ms": 78300,
+   "end_ms": 78600
+  }
+ ]
+}

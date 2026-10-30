@@ -1,0 +1,285 @@
+{
+  "slug": "ice-king",
+  "title": "How Ice Made a Man Rich",
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "characters": {
+    "hero": { "preset": "custom", "outfit_color": "#2EC4E6", "hair": "top-hat", "accessory": "scarf" },
+    "buddy": { "preset": "custom", "outfit_color": "#A07A52", "hair": "flat-cap", "accessory": "apron-brown" },
+    "captain": { "preset": "custom", "outfit_color": "#33415C", "hair": "peaked-cap", "accessory": "mustache,gold-buttons" },
+    "sailor_a": { "preset": "custom", "outfit_color": "#8C8270", "hair": "knit-cap" },
+    "sailor_b": { "preset": "custom", "outfit_color": "#7E7A6E", "hair": "knit-cap" },
+    "sailor_c": { "preset": "custom", "outfit_color": "#8A7C66", "hair": "knit-cap" },
+    "barkeep": { "preset": "custom", "outfit_color": "#7D7A55", "hair": "panama", "accessory": "apron-white" },
+    "narrator": { "preset": "custom" }
+  },
+  "shots": [
+    {
+      "id": "s01", "beat": "HOOK",
+      "text": "He is loading a whole ship with ice, and sailing it somewhere hot.",
+      "set": "cold-dock",
+      "characters": [{ "id": "hero", "pos": [0, 0, 0], "face": "smug", "action": "push-heavy" }],
+      "props": ["ice-block", "merchant-ship", "ice-crate", "ice-crate", "snowfall"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "medium", "to": "medium", "target": "hero" },
+      "sfx": ["ice-thunk"], "emphasis_word": "hot", "transition_in": "cut"
+    },
+    {
+      "id": "s02", "beat": "MOCKERY",
+      "text": "Every sailor on the dock is laughing.",
+      "set": "cold-dock",
+      "characters": [
+        { "id": "sailor_a", "pos": [-0.45, 0, 0.1], "face": "happy", "action": "laugh-bounce" },
+        { "id": "sailor_b", "pos": [0, 0, -0.15], "face": "happy", "action": "laugh-bounce" },
+        { "id": "sailor_c", "pos": [0.45, 0, 0.1], "face": "happy", "action": "laugh-bounce" }
+      ],
+      "props": ["merchant-ship", "snowfall"],
+      "lighting": "warm-key",
+      "camera": { "move": "pull-out", "from": "medium", "to": "wide", "target": "sailor_b" },
+      "sfx": ["crowd-laugh"], "emphasis_word": "laughing", "transition_in": "cut"
+    },
+    {
+      "id": "s03", "beat": "MOCKERY",
+      "text": "Ice? To the tropics? It'll be soup before you leave the harbor!",
+      "lines": [{ "speaker": "sailor_a", "text": "Ice? To the tropics? It'll be soup before you leave the harbor!" }],
+      "set": "cold-dock",
+      "characters": [{ "id": "sailor_a", "pos": [0, 0, 0], "face": "happy", "action": "yell-point" }],
+      "props": ["thought-bubble", "snowfall"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "medium", "to": "close", "target": "sailor_a" },
+      "sfx": [], "emphasis_word": "soup", "transition_in": "cut"
+    },
+    {
+      "id": "s04", "beat": "CHALLENGE",
+      "text": "The captain shakes his head. Who in a hot country even wants ice?",
+      "lines": [
+        { "speaker": "narrator", "text": "The captain shakes his head." },
+        { "speaker": "captain", "text": "Who in a hot country even wants ice?" }
+      ],
+      "set": "ship-deck",
+      "characters": [
+        { "id": "captain", "pos": [0.25, 0, 0], "face": "suspicious", "action": "shake-head" },
+        { "id": "hero", "pos": [-0.25, 0, 0.05], "face": "smug", "action": "idle" }
+      ],
+      "props": ["sawdust-sack"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "medium", "to": "medium", "target": "captain" },
+      "sfx": [], "emphasis_word": "hot", "transition_in": "whip"
+    },
+    {
+      "id": "s05", "beat": "CHALLENGE",
+      "text": "He just smiles and pats a sack of sawdust.",
+      "set": "ship-deck",
+      "characters": [{ "id": "hero", "pos": [-0.25, 0, 0.05], "face": "smug", "action": "pat-sack" }],
+      "props": ["sawdust-sack"],
+      "lighting": "warm-key",
+      "camera": { "move": "orbit", "from": "close", "to": "close", "target": "hero" },
+      "sfx": ["soft-pat"], "emphasis_word": "sawdust", "transition_in": "cut"
+    },
+    {
+      "id": "s06", "beat": "HALF-REVEAL",
+      "text": "Far away, on a hot island, his buddy is building a strange house.",
+      "set": "island-port",
+      "characters": [{ "id": "buddy", "pos": [0.55, 0, 0.5], "face": "happy", "action": "hammer" }],
+      "props": ["ice-house", "hammer"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "extreme-wide", "to": "wide", "target": "ice-house" },
+      "sfx": ["hammer-knock"], "emphasis_word": "strange", "transition_in": "whip"
+    },
+    {
+      "id": "s07", "beat": "HALF-REVEAL",
+      "text": "The walls are twice as thick as normal. No windows. Just one small door, and piles of sawdust inside.",
+      "set": "island-port",
+      "characters": [{ "id": "buddy", "pos": [0.55, 0, 0.5], "face": "happy", "action": "yell-point" }],
+      "props": ["ice-house"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "wide", "to": "medium", "target": "ice-house" },
+      "sfx": [], "emphasis_word": "twice", "transition_in": "cut"
+    },
+    {
+      "id": "s08", "beat": "ESC-3",
+      "text": "The trip takes weeks. Every day it gets hotter, and every day the crew checks the hold.",
+      "set": "ship-deck",
+      "characters": [
+        { "id": "sailor_a", "pos": [0.3, 0, 0.1], "face": "happy", "action": "peer-down" },
+        { "id": "hero", "pos": [-0.35, 0, 0], "face": "smug", "action": "arms-cross-smug" }
+      ],
+      "props": ["hatch", "sun-timelapse"],
+      "lighting": "warm-key",
+      "camera": { "move": "pan-right", "from": "wide", "to": "medium", "target": "hatch" },
+      "sfx": [], "emphasis_word": "hotter", "transition_in": "match-cut"
+    },
+    {
+      "id": "s09", "beat": "ESC-3",
+      "text": "Drip. Drip. Drip.",
+      "set": "ship-hold",
+      "characters": [],
+      "props": ["ice-stack", "water-drips", "lantern"],
+      "lighting": "overhead-bulb",
+      "camera": { "move": "push-in", "from": "medium", "to": "close", "target": "ice-stack" },
+      "sfx": ["water-drip"], "emphasis_word": "Drip", "transition_in": "cut"
+    },
+    {
+      "id": "s10", "beat": "ESC-3",
+      "text": "Hey, ice man! Should we sell your cargo by the cup?",
+      "lines": [{ "speaker": "sailor_a", "text": "Hey, ice man! Should we sell your cargo by the cup?" }],
+      "set": "ship-deck",
+      "characters": [
+        { "id": "sailor_a", "pos": [0.3, 0, 0.1], "face": "happy", "action": "yell-point" },
+        { "id": "hero", "pos": [-0.3, 0, 0], "face": "smug", "action": "arms-cross-smug" }
+      ],
+      "props": ["hatch"],
+      "lighting": "warm-key",
+      "camera": { "move": "orbit", "from": "medium", "to": "medium", "target": "sailor_a" },
+      "sfx": [], "emphasis_word": "cup", "transition_in": "cut"
+    },
+    {
+      "id": "s11", "beat": "ESC-3",
+      "text": "It's so hot the cook fries eggs on the deck.",
+      "set": "ship-deck",
+      "characters": [],
+      "props": ["frying-egg"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "close", "to": "extreme-close", "target": "frying-egg" },
+      "sfx": ["egg-sizzle"], "emphasis_word": "eggs", "transition_in": "cut"
+    },
+    {
+      "id": "s12", "beat": "ESC-3",
+      "text": "But he isn't worried. He just keeps the hatch shut tight, and waits.",
+      "set": "ship-deck",
+      "characters": [{ "id": "hero", "pos": [-0.3, 0, 0], "face": "smug", "action": "arms-cross-smug" }],
+      "props": ["hatch-closing"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "medium", "to": "close", "target": "hero" },
+      "sfx": ["hatch-slam"], "emphasis_word": "shut", "transition_in": "cut"
+    },
+    {
+      "id": "s13", "beat": "ESC-3",
+      "text": "The ship lands,",
+      "set": "island-port",
+      "characters": [],
+      "props": ["merchant-ship"],
+      "lighting": "warm-key",
+      "camera": { "move": "pan-left", "from": "wide", "to": "wide", "target": "merchant-ship" },
+      "sfx": ["door-creak"], "emphasis_word": "lands", "transition_in": "whip"
+    },
+    {
+      "id": "s14", "beat": "ESC-3",
+      "text": "and the ice is still solid.",
+      "set": "ship-hold",
+      "characters": [{ "id": "hero", "pos": [-0.4, 0, 0.2], "face": "smug", "action": "stand-proud" }],
+      "props": ["ice-stack", "god-rays", "lantern"],
+      "lighting": "overhead-bulb",
+      "camera": { "move": "push-in", "from": "medium", "to": "medium", "target": "ice-stack" },
+      "sfx": ["hollow-clink"], "emphasis_word": "solid", "transition_in": "flash"
+    },
+    {
+      "id": "s15", "beat": "TWIST",
+      "text": "But the bar owners just shrug.",
+      "set": "island-bar",
+      "characters": [
+        { "id": "barkeep", "pos": [0.25, 0, -0.1], "face": "blank", "action": "shrug" },
+        { "id": "hero", "pos": [-0.25, 0, 0.1], "face": "smug", "action": "idle" }
+      ],
+      "props": ["bar-sign"],
+      "lighting": "warm-key",
+      "camera": { "move": "orbit", "from": "medium", "to": "medium", "target": "barkeep" },
+      "sfx": [], "emphasis_word": "shrug", "transition_in": "whip"
+    },
+    {
+      "id": "s16", "beat": "TWIST",
+      "text": "Our drinks are warm, our beds are warm, we like warm!",
+      "lines": [{ "speaker": "barkeep", "text": "Our drinks are warm, our beds are warm, we like warm!" }],
+      "set": "island-bar",
+      "characters": [{ "id": "barkeep", "pos": [0.25, 0, -0.1], "face": "blank", "action": "yawn" }],
+      "props": [],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "medium", "to": "close", "target": "barkeep" },
+      "sfx": [], "emphasis_word": "like", "transition_in": "cut"
+    },
+    {
+      "id": "s17", "beat": "TWIST",
+      "text": "So he does something crazier. He gives the ice away. For free.",
+      "set": "island-bar",
+      "characters": [
+        { "id": "hero", "pos": [-0.25, 0, 0.1], "face": "smug", "action": "give-coin" },
+        { "id": "barkeep", "pos": [0.25, 0, -0.1], "face": "blank", "action": "idle" }
+      ],
+      "props": ["drink-glass"],
+      "lighting": "warm-key",
+      "camera": { "move": "dolly-zoom", "from": "medium", "to": "close", "target": "hero" },
+      "sfx": ["hollow-clink"], "emphasis_word": "free", "transition_in": "cut"
+    },
+    {
+      "id": "s18", "beat": "BUTTON",
+      "text": "You see, sawdust is full of tiny pockets of air, and air is terrible at carrying heat.",
+      "set": "ship-hold",
+      "characters": [],
+      "props": ["sawdust-macro"],
+      "lighting": "overhead-bulb",
+      "camera": { "move": "push-in", "from": "close", "to": "extreme-close", "target": "sawdust-macro" },
+      "sfx": ["whoosh"], "emphasis_word": "air", "transition_in": "match-cut"
+    },
+    {
+      "id": "s19", "beat": "BUTTON",
+      "text": "It's the same trick a picnic cooler uses today.",
+      "set": "island-port",
+      "characters": [],
+      "props": ["picnic-cooler"],
+      "lighting": "warm-key",
+      "camera": { "move": "orbit", "from": "close", "to": "close", "target": "picnic-cooler" },
+      "sfx": [], "emphasis_word": "cooler", "transition_in": "match-cut"
+    },
+    {
+      "id": "s20", "beat": "BUTTON",
+      "text": "Packed tight, big blocks last for months, even under a tropical sun.",
+      "set": "ship-hold",
+      "characters": [{ "id": "hero", "pos": [-0.45, 0, 0.25], "face": "smug", "action": "stand-proud" }],
+      "props": ["ice-stack", "lantern"],
+      "lighting": "overhead-bulb",
+      "camera": { "move": "pull-out", "from": "medium", "to": "wide", "target": "ice-stack" },
+      "sfx": [], "emphasis_word": "months", "transition_in": "match-cut"
+    },
+    {
+      "id": "s21", "beat": "BUTTON",
+      "text": "One taste of an ice-cold drink in the heat, and the whole town is hooked.",
+      "set": "island-bar",
+      "characters": [
+        { "id": "barkeep", "pos": [0, 0, -0.1], "face": "happy", "action": "sip-drink" },
+        { "id": "sailor_b", "pos": [-0.5, 0, 0.15], "face": "happy", "action": "laugh-bounce" },
+        { "id": "sailor_c", "pos": [0.5, 0, 0.15], "face": "happy", "action": "laugh-bounce" }
+      ],
+      "props": ["drink-glass", "bar-sign"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "wide", "to": "medium", "target": "barkeep" },
+      "sfx": ["hollow-clink", "tv-crowd-cheer"], "emphasis_word": "hooked", "transition_in": "cut"
+    },
+    {
+      "id": "s22", "beat": "BUTTON",
+      "text": "Every bar wants ice, every day. He builds more ice houses, more ships, more ice.",
+      "set": "cold-dock",
+      "characters": [
+        { "id": "sailor_b", "pos": [-0.3, 0, 0.3], "face": "blank", "action": "carry-crate" },
+        { "id": "sailor_c", "pos": [0.35, 0, 0.1], "face": "blank", "action": "carry-crate" }
+      ],
+      "props": ["merchant-ship", "merchant-ship", "merchant-ship", "ice-crate", "ice-crate", "snowfall"],
+      "lighting": "warm-key",
+      "camera": { "move": "pull-out", "from": "wide", "to": "extreme-wide", "target": "sailor_b" },
+      "sfx": [], "emphasis_word": "more", "transition_in": "whip"
+    },
+    {
+      "id": "s23", "beat": "BUTTON",
+      "text": "Now everyone who laughed is buying his ice.",
+      "set": "island-bar",
+      "characters": [
+        { "id": "sailor_a", "pos": [0.2, 0, 0], "face": "shocked", "action": "give-coin" },
+        { "id": "hero", "pos": [-0.35, 0, -0.1], "face": "smug", "action": "tip-hat" }
+      ],
+      "props": ["gold-coin", "bar-sign"],
+      "lighting": "warm-key",
+      "camera": { "move": "push-in", "from": "medium", "to": "close", "target": "sailor_a" },
+      "sfx": ["coin-drop"], "emphasis_word": "laughed", "transition_in": "cut"
+    }
+  ]
+}

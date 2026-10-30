@@ -1,0 +1,119 @@
+// Prop registry: shot-list prop names → components.
+import React from "react";
+import { BankBuilding, Chapel, FlowerArch, GiantEarDish, Mansion, TinyHouse } from "./buildings";
+import { Armchair, Bench, EmptyChairNameCard, OverheadBulb, Shelf, Sofa, Desk, Table, TV, WallClock } from "./furniture";
+import {
+  BirthdayCake, CalendarSundayFlip, FoamFinger, HandReceipt, PartyHat, ServingTray, ShoppingCart,
+  Smartphone, SoupBowl, WallCalendarFlipping,
+} from "./items";
+import {
+  BreadBig, BreadMedium, BreadSmall, BreadSteam, Candle, Chicken, Coffin, CoinJar, FreshGrave, GoldCoin, Gravestone,
+  GrandCoffin, PoisonBottle, PoisonBottleShelf, Shovel, SinSmoke, StoryBook, StoryBookSlam, TenPennies, ThreePennies,
+} from "./funeral";
+import {
+  BarSign, DrinkGlass, FryingEgg, GodRays, Hammer, Hatch, HatchClosing, IceBlock, IceCrate, IceHouse, IceStack, Lantern,
+  MerchantShip, PicnicCooler, SawdustMacro, SawdustSack, Snowfall, SunTimelapse, ThoughtBubble, WaterDrips,
+} from "./ice";
+import { PiggyBank, PiggyCracking, PiggyOnScale } from "./piggy";
+import { DollarBills, FloatingReceipt, GoldCoinPile, ReceiptAvalanche, ReceiptHero, ReceiptPile } from "./receipts";
+import type { PropProps } from "./types";
+import { BackDoor, BigMirror, Boots, HorsePacked, Sword } from "./wedding";
+import { BakeryFront, BreadOven, Cottage, Doorway, ManorWindow, ValleyRoad } from "./village";
+
+export const PROPS: Record<string, React.FC<PropProps>> = {
+  "floating-receipt": FloatingReceipt,
+  "receipt-hero": ReceiptHero,
+  "receipt-avalanche": ReceiptAvalanche,
+  "receipt-pile": ReceiptPile,
+  "hand-receipt": HandReceipt,
+  "dollar-bill-flying": DollarBills,
+  "gold-coin-pile": GoldCoinPile,
+  "giant-ear-dish": GiantEarDish,
+  "bank-building": BankBuilding,
+  mansion: Mansion,
+  "tiny-house": TinyHouse,
+  chapel: Chapel,
+  "flower-arch": FlowerArch,
+  armchair: Armchair,
+  bench: Bench,
+  "empty-armchair": Armchair,
+  sofa: Sofa,
+  shelf: Shelf,
+  "wall-clock": WallClock,
+  "overhead-bulb": OverheadBulb,
+  table: Table,
+  desk: Desk,
+  "empty-chair-name-card": EmptyChairNameCard,
+  tv: TV,
+  "shopping-cart": ShoppingCart,
+  "birthday-cake": BirthdayCake,
+  "party-hat": PartyHat,
+  smartphone: Smartphone,
+  "wall-calendar-flipping": WallCalendarFlipping,
+  "calendar-sunday-flip": CalendarSundayFlip,
+  "soup-bowl": SoupBowl,
+  "serving-tray": ServingTray,
+  "foam-finger": FoamFinger,
+  "piggy-bank-full": PiggyBank,
+  "piggy-bank-half": PiggyOnScale,
+  "piggy-bank-low": PiggyBank,
+  "piggy-bank-cracking": PiggyCracking,
+  coffin: Coffin,
+  "grand-coffin": GrandCoffin,
+  "funeral-bread-small": BreadSmall,
+  "funeral-bread-medium": BreadMedium,
+  "funeral-bread-big": BreadBig,
+  "bread-steam": BreadSteam,
+  "sin-smoke": SinSmoke,
+  candle: Candle,
+  chicken: Chicken,
+  "poison-bottle": PoisonBottle,
+  "poison-bottle-shelf": PoisonBottleShelf,
+  "three-pennies": ThreePennies,
+  "ten-pennies": TenPennies,
+  "gold-coin": GoldCoin,
+  "coin-jar": CoinJar,
+  shovel: Shovel,
+  "fresh-grave": FreshGrave,
+  "fresh-grave-2": FreshGrave,
+  gravestone: Gravestone,
+  "story-book": StoryBook,
+  "story-book-slam": StoryBookSlam,
+  cottage: Cottage,
+  doorway: Doorway,
+  "bakery-front": BakeryFront,
+  "manor-window": ManorWindow,
+  "bread-oven": BreadOven,
+  "valley-road": ValleyRoad,
+  boots: Boots,
+  "horse-packed": HorsePacked,
+  "big-mirror": BigMirror,
+  "back-door": BackDoor,
+  sword: Sword,
+  "ice-block": IceBlock,
+  "ice-crate": IceCrate,
+  "merchant-ship": MerchantShip,
+  snowfall: Snowfall,
+  "thought-bubble": ThoughtBubble,
+  "sawdust-sack": SawdustSack,
+  "ice-house": IceHouse,
+  hammer: Hammer,
+  hatch: Hatch,
+  "hatch-closing": HatchClosing,
+  "sun-timelapse": SunTimelapse,
+  "ice-stack": IceStack,
+  "water-drips": WaterDrips,
+  lantern: Lantern,
+  "frying-egg": FryingEgg,
+  "god-rays": GodRays,
+  "bar-sign": BarSign,
+  "drink-glass": DrinkGlass,
+  "sawdust-macro": SawdustMacro,
+  "picnic-cooler": PicnicCooler,
+};
+
+export const propComponent = (name: string): React.FC<PropProps> => {
+  const c = PROPS[name];
+  if (!c) throw new Error(`Unknown prop "${name}". Add it to src/props/index.tsx`);
+  return c;
+};
