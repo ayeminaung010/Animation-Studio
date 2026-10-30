@@ -12,8 +12,8 @@ export const CAMERA = {
   maxStep: 0.6,
   /** ...spread over at most this long before the key, so big pull-outs don't whoosh. */
   maxMoveSec: 2,
-  /** Handheld amplitude (motion-kit units are sized for a 1-unit-tall rig; ours are 1.75). */
-  handheld: 1.5,
+  /** Handheld amplitude: the motion-upgrade demo's 2 on its 1-unit rig, × 1.75 for ours. Lower and settled holds read as frozen (motion_qa still_pct). */
+  handheld: 3.5,
   /** Impact shake multiplier, same scaling. */
   shake: 1.75,
 };

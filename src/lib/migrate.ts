@@ -1,6 +1,6 @@
 // v1 shot list (03-shots.json + LAYOUT) → engine contract v1.1 scenes.
 // - Consecutive shots on the same set merge into one scene (one camera take).
-// - Each shot's camera from/to become keys at its first word and its last word (orbit/pan/dolly get a middle key).
+// - Each shot's camera from/to become keys at its first, middle and last word.
 // - Actions/faces become base actions, gestures (where a gesture matches) and expressions.
 // - Every character gets a seeded default performance: energy 0.7–1.0, gaze at whoever talks
 //   (listeners 7 frames late), a glance away at least every ~3.5 s.
@@ -78,7 +78,9 @@ export const migrateV1toV2 = (
       const lay = layout[t.shot.id];
       const placed = placementsFor(t.shot, lay);
       const n = lastWord(t);
-      const at = [t.firstWord, ...(["orbit", "pan-left", "pan-right", "dolly-zoom"].includes(t.shot.camera.move) ? [Math.round((t.firstWord + n) / 2)] : []), n];
+      // A middle key on every shot keeps the camera gliding through it instead of holding the opening
+      // framing until the last word (motion_qa: frozen frames and abrupt starts sat in those holds).
+      const at = [t.firstWord, Math.round((t.firstWord + n) / 2), n];
       return [...new Set(at)].map((w, j, all) => {
         const p = all.length === 1 ? 0 : j / (all.length - 1);
         const r = framingAt(cameraSpecAt(t.shot, lay, placed, wordFrame(w) - t.from, t.durationInFrames), p);
@@ -91,7 +93,11 @@ export const migrateV1toV2 = (
     const props: NonNullable<SceneV11["x_props"]> = [];
     for (const t of g) {
       for (const { name, place } of placementsFor(t.shot, layout[t.shot.id])) {
-        const { startAt, ...rest } = place;
+        // `focus` only aims the camera (already baked into the keys), so it doesn't make a prop "different".
+        const rest: Placement = { ...place };
+        delete rest.focus;
+        delete rest.startAt;
+        const { startAt } = place;
         const prev = props.find((x) => x.name === name && x.toWord === t.firstWord - 1 && JSON.stringify(x.place) === JSON.stringify(rest));
         if (prev) {
           prev.toWord = lastWord(t);
@@ -107,7 +113,7 @@ export const migrateV1toV2 = (
           startWord = t.firstWord + k;
           startOffset = startAt.offset ?? 0;
         }
-        props.push({ name, place: rest as Placement, fromWord: t.firstWord, toWord: lastWord(t), startWord, startOffset });
+        props.push({ name, place: rest, fromWord: t.firstWord, toWord: lastWord(t), startWord, startOffset });
       }
     }
 

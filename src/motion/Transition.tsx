@@ -1,6 +1,7 @@
 // Scene transitions (motion v2), done in Remotion over the rendered take.
 // Each type has an OUT half (last frames of the outgoing take) and an IN half (first frames of the
-// incoming one); the hard switch between them is hidden under white, blur, black or a fast pan.
+// incoming one). Soft types also overlap: the outgoing take plays on for the IN half while the incoming
+// one fades in over it, so no single frame carries the whole change (motion_qa counts that as a cut).
 import React from "react";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 
@@ -13,10 +14,15 @@ export const TRANSITION_FRAMES: Record<TransitionType, [number, number]> = {
   THROUGH: [6, 8],
   IRIS: [9, 9],
   MATCH: [0, 0],
-  FLASH: [2, 5],
+  FLASH: [4, 6],
   WHIP: [4, 6],
   CUT: [0, 0],
 };
+
+/** Hard cuts by design; every other type overlaps the two takes. */
+export const isHard = (t: TransitionType) => t === "CUT" || t === "MATCH";
+/** Frames the outgoing take keeps playing under the incoming one. */
+export const overlapFrames = (out: TransitionType) => (isHard(out) ? 0 : TRANSITION_FRAMES[out][1]);
 
 /** v1 shot-list transition names. */
 export const fromV1Transition = (t: string): TransitionType =>
@@ -46,18 +52,22 @@ const half = (type: TransitionType, t: number, dir: 1 | -1): { style: React.CSSP
 export const TransitionWrap: React.FC<{
   in?: TransitionType;
   out?: TransitionType;
-  /** Frame inside the take and the take's length. */
+  /** Frame inside the take, and the take's length including the overlap tail. */
   frame: number;
   duration: number;
+  /** The take's own colour; the whole layer (background included) fades in for soft IN types. */
+  background: string;
   children: React.ReactNode;
-}> = ({ in: tin = "CUT", out: tout = "CUT", frame, duration, children }) => {
+}> = ({ in: tin = "CUT", out: tout = "CUT", frame, duration, background, children }) => {
   const nIn = TRANSITION_FRAMES[tin][1];
   const nOut = TRANSITION_FRAMES[tout][0];
   const inT = nIn ? interpolate(frame, [0, nIn], [1, 0], { ...clamp, easing: Easing.out(Easing.cubic) }) : 0;
   const outT = nOut ? interpolate(frame, [duration - nOut, duration - 1], [0, 1], { ...clamp, easing: Easing.in(Easing.cubic) }) : 0;
   const active = outT > 0 ? half(tout, outT, 1) : inT > 0 ? half(tin, inT, -1) : { style: {}, flash: 0 };
+  // Even S-curve: an ease-out fade put ~40% of the change into one frame, which motion_qa counts as a cut.
+  const fadeIn = nIn ? interpolate(frame, [0, nIn], [0, 1], { ...clamp, easing: Easing.inOut(Easing.sin) }) : 1;
   return (
-    <AbsoluteFill>
+    <AbsoluteFill style={{ backgroundColor: background, overflow: "hidden", opacity: isHard(tin) ? 1 : fadeIn }}>
       <AbsoluteFill style={active.style}>{children}</AbsoluteFill>
       {active.flash > 0 ? <AbsoluteFill style={{ backgroundColor: "white", opacity: active.flash }} /> : null}
     </AbsoluteFill>

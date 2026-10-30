@@ -17,13 +17,22 @@ import { useMouth } from "./Shot";
 /** Below this presence scale a character or prop isn't drawn. */
 const HIDDEN = 0.001;
 
-export const SceneView: React.FC<{ scene: ResolvedScene; voice: string }> = ({ scene, voice }) => {
+/** With a voice file, speakers' mouths follow its loudness; without one, motion-kit's word lip-flap. */
+export const SceneView: React.FC<{ scene: ResolvedScene; voice?: string }> = ({ scene, voice }) =>
+  voice ? <VoicedScene scene={scene} voice={voice} /> : <SceneBody scene={scene} mouth={null} />;
+
+const VoicedScene: React.FC<{ scene: ResolvedScene; voice: string }> = ({ scene, voice }) => {
+  const f = useCurrentFrame();
+  const mouth = useMouth(voice, scene.from + f, scene.cast.some((c) => c.perf.speaks?.length));
+  return <SceneBody scene={scene} mouth={mouth} />;
+};
+
+const SceneBody: React.FC<{ scene: ResolvedScene; mouth: number | null }> = ({ scene, mouth }) => {
   const f = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const set = setDef(scene.set);
   const bg = set.sky?.[scene.lighting] ?? BACKGROUND[scene.lighting];
   const motions = scene.cast.map((c) => characterMotion(f, fps, c.perf));
-  const mouth = useMouth(voice, scene.from + f, scene.cast.some((c) => c.perf.speaks?.length));
 
   const propNode = (p: SceneProp) => {
     const s = p.scaleAt(f);
@@ -32,7 +41,7 @@ export const SceneView: React.FC<{ scene: ResolvedScene; voice: string }> = ({ s
     return (
       <group key={p.key} scale={s}>
         <group position={p.place.at ?? [0, 0, 0]} rotation={p.place.rot ?? [0, 0, 0]} scale={p.place.scale ?? 1}>
-          <C f={f - p.zero} d={p.to - p.from} fps={fps} />
+          <C f={f - p.zero} d={Math.min(p.to, scene.duration) - p.from} fps={fps} />
         </group>
       </group>
     );
@@ -45,8 +54,7 @@ export const SceneView: React.FC<{ scene: ResolvedScene; voice: string }> = ({ s
   const SetC = set.component;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>
-      <TransitionWrap in={scene.transitionIn} out={scene.transitionOut} frame={f} duration={scene.duration}>
+    <TransitionWrap in={scene.transitionIn} out={scene.transitionOut} frame={f} duration={scene.duration + scene.tail} background={bg}>
         <AbsoluteFill style={{ scale: scene.punchAt(f) }}>
           <ThreeCanvas width={width} height={height} gl={{ antialias: true }}>
             <color attach="background" args={[bg]} />
@@ -69,7 +77,7 @@ export const SceneView: React.FC<{ scene: ResolvedScene; voice: string }> = ({ s
                     action="idle"
                     frame={f}
                     duration={scene.duration}
-                    mouthOpen={m.speaking ? mouth : 0}
+                    mouthOpen={mouth === null ? m.mouth : m.speaking ? mouth : 0}
                     motion={motion}
                     facing={c.facingAt(f)}
                     leftHand={slot(c.id, "L")}
@@ -83,7 +91,6 @@ export const SceneView: React.FC<{ scene: ResolvedScene; voice: string }> = ({ s
             {scene.props.filter((p) => !p.place.char).map(propNode)}
           </ThreeCanvas>
         </AbsoluteFill>
-      </TransitionWrap>
-    </AbsoluteFill>
+    </TransitionWrap>
   );
 };

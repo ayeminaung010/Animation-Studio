@@ -9,7 +9,7 @@ import type { Placement } from "../lib/staging";
 import { CAMERA, densify, trackAt, type TrackSpec } from "./cameraTrack";
 import { TOWARD_CHEAT, TOWARD_MAX } from "./defaults";
 import { clamp01, SPRINGS, springStep, springTrack, type GazeKey } from "./motion-kit";
-import type { TransitionType } from "./Transition";
+import { overlapFrames, type TransitionType } from "./Transition";
 import type { ActionSpan, Performance } from "./useCharacterMotion";
 
 /** Characters and props enter/exit this many frames before their shot starts/ends (camera is mid-travel). */
@@ -54,6 +54,8 @@ export interface ResolvedScene {
   punchAt: (f: number) => number;
   transitionIn: TransitionType;
   transitionOut: TransitionType;
+  /** Frames this take keeps playing under the next one (soft transitions). */
+  tail: number;
 }
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -177,7 +179,8 @@ export const resolveScene = (p: ProjectV11, index: number, fps: number): Resolve
       name: x.name,
       place: x.place,
       from: start,
-      to: x.toWord >= s.toWord ? duration : words[x.toWord + 1].start - from,
+      // Props on until the scene's last word stay through the overlap tail under the next scene.
+      to: x.toWord >= s.toWord ? Infinity : words[x.toWord + 1].start - from,
       zero,
       scaleAt: presence(enterAt(x.fromWord), exitAt(x.toWord)),
     };
@@ -199,5 +202,6 @@ export const resolveScene = (p: ProjectV11, index: number, fps: number): Resolve
     punchAt,
     transitionIn: index > 0 ? p.scenes[index - 1].transitionOut?.type ?? "CUT" : "CUT",
     transitionOut: s.transitionOut?.type ?? "CUT",
+    tail: overlapFrames(s.transitionOut?.type ?? "CUT"),
   };
 };

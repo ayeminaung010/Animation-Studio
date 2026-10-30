@@ -69,6 +69,9 @@ pauses, `musicDbAt` in `src/lib/cues.ts`) over a continuous room-tone `BED`, so 
    readable text.
 3. `npm run mix:check -- <slug>` after any audio change.
 4. Rendering is done by the user on their own machine (`npm run render -- <slug>`); don't start a
-   full render unless asked. After a render: `npm run qa -- <slug>` — all checks PASS.
+   full render unless asked. `MOTION=v1|v2` picks the version (→ `out/<slug>-<motion>.mp4`),
+   `npm run render:draft` renders at half size. After a render: `npm run qa -- <slug>` (same `MOTION`) runs
+   `tools/qa.py` and `motion-upgrade/tools/motion_qa.py` — all checks PASS. The `motion-test` composition
+   (6 s, `src/lab/MotionTest.tsx`) is the quick motion regression check.
 5. Only when the user says the episode is final: `npm run clean -- <slug>`, show them the list, then
    `--yes`. Then `npm run check`.

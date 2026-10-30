@@ -124,7 +124,7 @@ export const IceKing: React.FC<{ motion: MotionVersion }> = ({ motion }) => (
   >
     {motion === "v2"
       ? scenes.map((s) => (
-        <Sequence key={s.id} name={`${s.id} · ${s.set}`} from={s.from} durationInFrames={s.duration}>
+        <Sequence key={s.id} name={`${s.id} · ${s.set}`} from={s.from} durationInFrames={s.duration + s.tail}>
           <SceneView scene={s} voice={VOICE} />
         </Sequence>
       ))
