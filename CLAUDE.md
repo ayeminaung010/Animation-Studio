@@ -25,6 +25,11 @@ renders it. Read `README.md` for the layout and `SETUP.md` for commands.
 - `src/components/` — `Character` (one rig for everyone), `Face` (10 expressions), `actions.ts`
   (poses as pure functions of frame), `CameraRig`, `Lighting`, `Shot` (renders one shot),
   `Captions`, `Soundtrack`, `toon` (`T` = toon mesh with outline, `Ink` = flat black detail).
+- `src/motion/` — motion v2 (in progress, see `motion-upgrade/`): `motion-kit.ts` (copied from the
+  bundle, don't edit), `useCharacterMotion.ts` (all layers for one character at one frame, on top of the
+  action pose), `gestures.ts` (15 gesture poses), `fromShot.ts` (default performance per shot). v1 is
+  untouched when `motion` is "v1" (the composition default). Check v2 with `MOTION=v2 npm run stills -- <slug>`
+  (→ `out/stills-v2/`), gesture poses with the `gesture-sheet` composition, and `npm test` after motion changes.
 - `src/sets/index.tsx`, `src/props/*` — the library. New props must be registered in
   `src/props/index.tsx`; unknown names throw with a message saying where to add them.
 - `tools/` — `make_audio.py` (music + SFX synthesis), `align_words.py` (transcript → words),

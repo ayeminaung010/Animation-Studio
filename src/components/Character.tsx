@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import type { CharacterDef, FaceName, Vec3 } from "../lib/shots";
+import type { CharacterMotion } from "../motion/useCharacterMotion";
 import { poseFor, type Euler3 } from "./actions";
 import { Face, HEAD_R } from "./Face";
 import { Ink, T } from "./toon";
@@ -231,9 +232,10 @@ const Outfit: React.FC<{ look: Look }> = ({ look }) => {
   }
 };
 
-/** Body extras, from a comma-separated `accessory` list. */
-const BodyExtras: React.FC<{ list: string[] }> = ({ list }) => {
+/** Body extras, from a comma-separated `accessory` list. `tailLag` (v2) swings the scarf tail about its top. */
+const BodyExtras: React.FC<{ list: string[]; tailLag?: number }> = ({ list, tailLag }) => {
   const front = 0.215;
+  const tailTop: Vec3 = [0.08, 0.54, front + 0.02];
   return (
     <group>
       {list.includes("scarf") ? (
@@ -241,9 +243,17 @@ const BodyExtras: React.FC<{ list: string[] }> = ({ list }) => {
           <T color="#E8413C" position={[0, 0.56, 0]} outline={0.012}>
             <torusGeometry args={[0.17, 0.05, 10, 24]} />
           </T>
-          <T color="#E8413C" position={[0.08, 0.42, front + 0.02]} rotation={[0, 0, 0.15]} outline={0.01}>
-            <boxGeometry args={[0.08, 0.24, 0.04]} />
-          </T>
+          {tailLag === undefined ? (
+            <T color="#E8413C" position={[0.08, 0.42, front + 0.02]} rotation={[0, 0, 0.15]} outline={0.01}>
+              <boxGeometry args={[0.08, 0.24, 0.04]} />
+            </T>
+          ) : (
+            <group position={tailTop} rotation={[tailLag, 0, 0]}>
+              <T color="#E8413C" position={[0.08 - tailTop[0], 0.42 - tailTop[1], front + 0.02 - tailTop[2]]} rotation={[0, 0, 0.15]} outline={0.01}>
+                <boxGeometry args={[0.08, 0.24, 0.04]} />
+              </T>
+            </group>
+          )}
         </group>
       ) : null}
       {list.filter((a) => a.startsWith("apron-")).map((a) => (
@@ -309,20 +319,47 @@ const Hose: React.FC<{ a: Vec3; mid: Vec3; b: Vec3; r: number }> = ({ a, mid, b,
 const ELBOW_OUT = 0.05;
 const ELBOW_BACK = 0.06;
 
-const Arm: React.FC<{ side: 1 | -1; rot: Euler3; slot?: React.ReactNode }> = ({ side, rot, slot }) => (
-  <group position={[side * 0.235, 0.46, 0]} rotation={rot}>
-    <Hose a={[0, 0, 0]} mid={[side * ELBOW_OUT, -ARM_LEN / 2, -ELBOW_BACK]} b={[0, -ARM_LEN, 0]} r={LIMB_R} />
-    <T color={SKIN} position={[0, -ARM_LEN - 0.03, 0]} outline={0.012}>
-      <sphereGeometry args={[0.065, 14, 10]} />
-    </T>
-    {slot ? (
-      // Counter-rotate so held props stay roughly upright whatever the arm does.
-      <group position={[0, -ARM_LEN - 0.07, 0]} rotation={[-rot[0], 0, -rot[2]]}>
-        {slot}
-      </group>
-    ) : null}
-  </group>
-);
+/**
+ * `bend` swings the forearm forward about the elbow (radians); 0 is the straight-through hose.
+ * `twist` turns that bend plane about the arm's own axis; `stretch` lengthens the rubber hose.
+ * `lift` raises the shoulder (breathing, shrugs).
+ */
+const Arm: React.FC<{
+  side: 1 | -1; rot: Euler3; slot?: React.ReactNode; bend?: number; twist?: number; stretch?: number; lift?: number;
+}> = ({ side, rot, slot, bend = 0, twist = 0, stretch = 1, lift = 0 }) => {
+  const half = (ARM_LEN / 2) * stretch;
+  const elbow: Vec3 = [side * ELBOW_OUT, -half, -ELBOW_BACK];
+  const [c, s] = [Math.cos(-bend), Math.sin(-bend)];
+  // Point `d` past the hand along the forearm, rotated about the elbow's x axis.
+  const along = (d: number): Vec3 => {
+    const v: Vec3 = [-side * ELBOW_OUT, -half - d, ELBOW_BACK];
+    return [elbow[0] + v[0], elbow[1] + v[1] * c - v[2] * s, elbow[2] + v[1] * s + v[2] * c];
+  };
+  const limb = (
+    <>
+      <Hose a={[0, 0, 0]} mid={elbow} b={along(0)} r={LIMB_R} />
+      <T color={SKIN} position={along(0.03)} outline={0.012}>
+        <sphereGeometry args={[0.065, 14, 10]} />
+      </T>
+      {slot ? (
+        // Counter-rotate so held props stay roughly upright whatever the arm does.
+        <group position={along(0.07)} rotation={[-rot[0] + bend, 0, -rot[2]]}>
+          {slot}
+        </group>
+      ) : null}
+    </>
+  );
+  return (
+    <group position={[side * 0.235, 0.46 + lift, 0]} rotation={rot}>
+      {twist ? <group rotation={[0, twist, 0]}>{limb}</group> : limb}
+    </group>
+  );
+};
+
+/** Hair styles that are hats: they get follow-through; hair caps stay glued to the skull. */
+const HATS = new Set(["top-hat", "flat-cap", "peaked-cap", "knit-cap", "panama"]);
+/** Hat pivot: the crown of the head. */
+const HAT_PIVOT: Vec3 = [0, HEAD_R * 0.8, 0];
 
 /** Thigh swings forward with `sit`; the shin keeps hanging at `swing`, so seated knees bend and feet reach the floor. */
 const Leg: React.FC<{ side: 1 | -1; swing: number; sit: number }> = ({ side, swing, sit }) => {
@@ -360,15 +397,18 @@ export interface CharacterProps {
   /** Extra facing (radians) and offset (world units) from the episode layout. */
   facing?: number;
   offset?: Vec3;
+  /** Motion v2 channels (useCharacterMotion). Replaces the action pose; without it the character renders as v1. */
+  motion?: CharacterMotion;
 }
 
 export const Character: React.FC<CharacterProps> = ({
   def, pos, face, action, frame, duration, mouthOpen = 0, leftHand, rightHand, headwear, front,
-  facing = 0, offset = [0, 0, 0],
+  facing = 0, offset = [0, 0, 0], motion: m,
 }) => {
   const look = resolveLook(def);
   const extras = look.accessory?.split(",") ?? [];
-  const p = poseFor(action, frame, duration);
+  const p = m?.pose ?? poseFor(action, frame, duration);
+  const hatLag = HATS.has(look.hair) && m ? m.hatLag : undefined;
   const hipDrop = poseDrop(p);
   const legSwing = (side: number) => (side === 1 ? p.legL : p.legR) + 1.3 * p.kneel;
 
@@ -380,20 +420,30 @@ export const Character: React.FC<CharacterProps> = ({
       <group position={[0, HIP_Y - hipDrop, 0]} rotation={[p.lean, 0, p.tilt]} scale={[1, p.squash, 1]}>
         <Leg side={1} swing={legSwing(1)} sit={p.sit} />
         <Leg side={-1} swing={legSwing(-1)} sit={p.sit} />
-        <T color={look.body} position={[0, 0.3, 0]} outline={0.02}>
+        <T color={look.body} position={[0, 0.3, 0]} scale={m ? [m.chest[0], m.chest[1], m.chest[0]] : 1} outline={0.02}>
           <capsuleGeometry args={[0.22, 0.2, 8, 20]} />
         </T>
         <Outfit look={look} />
-        <BodyExtras list={extras} />
-        <Arm side={1} rot={p.armL} slot={leftHand} />
-        <Arm side={-1} rot={p.armR} slot={rightHand} />
+        <BodyExtras list={extras} tailLag={m?.tailLag} />
+        <Arm side={1} rot={p.armL} slot={leftHand} bend={m?.bendL} twist={m?.twistL} stretch={m?.stretchL} lift={m?.shoulderL} />
+        <Arm side={-1} rot={p.armR} slot={rightHand} bend={m?.bendR} twist={m?.twistR} stretch={m?.stretchR} lift={m?.shoulderR} />
         <group position={[0, 0.6, 0]} rotation={p.head}>
           <group position={[0, 0.32, 0]}>
             <T color={SKIN} outline={0.022}>
               <sphereGeometry args={[HEAD_R, 40, 28]} />
             </T>
-            <Face face={face} mouthOpen={mouthOpen} frame={frame} />
-            <Hair style={look.hair} />
+            <Face face={m?.face ?? face} mouthOpen={mouthOpen} frame={frame}
+              faceFrom={m?.faceFrom} faceT={m?.faceT} eyes={m?.eyes} blink={m?.blink} />
+            {hatLag ? (
+              // Hat pivots on the crown and lags behind the head.
+              <group position={HAT_PIVOT} rotation={hatLag}>
+                <group position={[-HAT_PIVOT[0], -HAT_PIVOT[1], -HAT_PIVOT[2]]}>
+                  <Hair style={look.hair} />
+                </group>
+              </group>
+            ) : (
+              <Hair style={look.hair} />
+            )}
             {extras.includes("small-glasses") ? <Glasses /> : null}
             {extras.includes("mustache") ? <Mustache /> : null}
             {headwear}

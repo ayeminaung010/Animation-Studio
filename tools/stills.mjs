@@ -1,6 +1,7 @@
 // Render review stills: one frame per shot (at a chosen point in each shot) from a single bundle.
 // usage: node tools/stills.mjs <composition> [at=0.5] [shotIds,comma,separated]
-// env: REMOTION_BROWSER (Chrome/Chromium path), REMOTION_GL (default "angle"; use "swangle" with no GPU)
+// env: REMOTION_BROWSER (Chrome/Chromium path), REMOTION_GL (default "angle"; use "swangle" with no GPU),
+//      MOTION=v2 (render the motion-v2 version; stills go to out/stills-v2/)
 import { bundle } from "@remotion/bundler";
 import { renderStill, selectComposition } from "@remotion/renderer";
 import fs from "node:fs";
@@ -27,8 +28,9 @@ const end = Math.round(((words[words.length - 1].endMs + 500) / 1000) * fps);
 const serveUrl = await bundle({ entryPoint: path.join(root, "src/index.ts") });
 const chromiumOptions = { gl: process.env.REMOTION_GL ?? "angle" };
 const browserExecutable = process.env.REMOTION_BROWSER ?? null;
-const composition = await selectComposition({ serveUrl, id: comp, chromiumOptions, browserExecutable });
-const outDir = path.join(root, "out/stills");
+const inputProps = process.env.MOTION ? { motion: process.env.MOTION } : {};
+const composition = await selectComposition({ serveUrl, id: comp, chromiumOptions, browserExecutable, inputProps });
+const outDir = path.join(root, process.env.MOTION === "v2" ? "out/stills-v2" : "out/stills");
 fs.mkdirSync(outDir, { recursive: true });
 
 const wanted = only ? new Set(only.split(",")) : null;
@@ -38,7 +40,7 @@ try {
     const to = k + 1 < shots.length ? starts[k + 1] : end;
     const frame = Math.min(to - 1, Math.round(starts[k] + (to - starts[k]) * at));
     const output = path.join(outDir, `${shots[k].id}.png`);
-    await renderStill({ composition, serveUrl, frame, output, chromiumOptions, browserExecutable, logLevel: "error" });
+    await renderStill({ composition, serveUrl, frame, output, chromiumOptions, browserExecutable, inputProps, logLevel: "error" });
     console.log(`${shots[k].id} frame ${frame} → ${path.relative(root, output)}`);
   }
 } finally {

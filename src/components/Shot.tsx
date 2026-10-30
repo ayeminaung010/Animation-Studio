@@ -5,6 +5,8 @@ import { ThreeCanvas } from "@remotion/three";
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { CharacterDef, Vec3 } from "../lib/shots";
+import { shotPerformances } from "../motion/fromShot";
+import { characterMotion } from "../motion/useCharacterMotion";
 import { resolveAt, type ShotTiming, type StartAt } from "../lib/timing";
 import { propComponent } from "../props";
 import { setDef } from "../sets";
@@ -12,6 +14,8 @@ import { CameraRig, type CameraSpec } from "./CameraRig";
 import { poseFor } from "./actions";
 import { Character, headWorld, markWorld, poseDrop } from "./Character";
 import { BACKGROUND, Lighting } from "./Lighting";
+
+export type MotionVersion = "v1" | "v2";
 
 export interface Placement {
   /** World position, or an offset inside the slot when `hand`/`head`/`front` is set. */
@@ -65,7 +69,9 @@ export const ShotView: React.FC<{
   layout: ShotLayout;
   /** Path of the voice file inside public/ (drives speaking mouths). */
   voice: string;
-}> = ({ timing, characters, layout, voice }) => {
+  /** "v2" layers motion-kit performances (idle, gaze, blinks, follow-through) over the actions. */
+  motion?: MotionVersion;
+}> = ({ timing, characters, layout, voice, motion = "v1" }) => {
   const f = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const { shot, durationInFrames: d, emphasisFrame } = timing;
@@ -77,6 +83,7 @@ export const ShotView: React.FC<{
   const talker = timing.words.filter((w) => w.start <= f).pop()?.speaker;
   const talks = (c: { id: string; speaking?: boolean }) => (shot.lines ? talker === c.id : c.speaking);
   const chars = layout.chars ?? {};
+  const perfs = motion === "v2" ? shotPerformances(timing, layout, fps) : null;
 
   // Resolve every prop occurrence to a placement.
   const seen: Record<string, number> = {};
@@ -170,7 +177,9 @@ export const ShotView: React.FC<{
           <CameraRig spec={spec} frame={f} duration={d} />
           {/* No inner <Suspense>: ThreeCanvas's own boundary holds the frame until textures load. */}
           <SetC f={f} />
-          {shot.characters.map((c) => (
+          {shot.characters.map((c) => {
+            const m = perfs ? characterMotion(f, fps, perfs[c.id]) : undefined;
+            return (
             <Character
               key={c.id}
               def={characters[c.id]}
@@ -179,7 +188,8 @@ export const ShotView: React.FC<{
               action={c.action}
               frame={f}
               duration={d}
-              mouthOpen={talks(c) ? mouth : 0}
+              mouthOpen={(m ? m.speaking : talks(c)) ? mouth : 0}
+              motion={m}
               facing={chars[c.id]?.facing}
               offset={chars[c.id]?.offset}
               leftHand={slot(c.id, "L")}
@@ -187,7 +197,8 @@ export const ShotView: React.FC<{
               headwear={slot(c.id, "head")}
               front={slot(c.id, "front")}
             />
-          ))}
+            );
+          })}
           {world}
         </ThreeCanvas>
       </AbsoluteFill>

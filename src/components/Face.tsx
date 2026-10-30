@@ -58,24 +58,46 @@ const onSurface = (x: number, y: number, lift = 0.004) => {
 
 const ARC = Math.PI * 0.8;
 
-export const Face: React.FC<{ face: FaceName; mouthOpen?: number; frame?: number }> = ({
-  face,
-  mouthOpen = 0,
-  frame = 0,
-}) => {
-  const p = FACES[face];
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+const mixBrow = (a: Brow, b: Brow, t: number): Brow => ({ y: mix(a.y, b.y, t), inner: mix(a.inner, b.inner, t) });
+/** Numbers blend; the mouth shape and tears switch at the halfway point. */
+const blendFace = (a: FaceParams, b: FaceParams, t: number): FaceParams => ({
+  eyeW: mix(a.eyeW, b.eyeW, t), eyeH: mix(a.eyeH, b.eyeH, t), lidL: mix(a.lidL, b.lidL, t), lidR: mix(a.lidR, b.lidR, t),
+  browL: mixBrow(a.browL, b.browL, t), browR: mixBrow(a.browR, b.browR, t),
+  mouth: t < 0.5 ? a.mouth : b.mouth, mouthW: mix(a.mouthW, b.mouthW, t), mouthH: mix(a.mouthH, b.mouthH, t),
+  mouthX: mix(a.mouthX, b.mouthX, t), tears: t < 0.5 ? a.tears : b.tears,
+});
+
+export const Face: React.FC<{
+  face: FaceName;
+  mouthOpen?: number;
+  frame?: number;
+  /** Motion v2: expression blending from `faceFrom` (t = 0) to `face` (t = 1). */
+  faceFrom?: FaceName;
+  faceT?: number;
+  /** Eye offset, radians [yaw (+ = character's left), pitch (+ = down)]. */
+  eyes?: [number, number];
+  /** Eyelid closure 0..1 on top of the expression's lids. */
+  blink?: number;
+}> = ({ face, mouthOpen = 0, frame = 0, faceFrom, faceT = 1, eyes = [0, 0], blink = 0 }) => {
+  const p = faceFrom && faceT < 1 ? blendFace(FACES[faceFrom], FACES[face], faceT) : FACES[face];
+  // The mouth narrows through a shape switch so it morphs instead of popping.
+  const morph = faceFrom && faceT < 1 && FACES[faceFrom].mouth !== FACES[face].mouth ? 0.35 + 0.65 * Math.abs(2 * faceT - 1) : 1;
   const eyeY = 0.04;
   const mouthY = -0.11;
+  // Gaze slides the eyes over the sphere (onSurface keeps them on it); capped so they stay on the face.
+  const gx = Math.max(-0.09, Math.min(0.09, eyes[0] * HEAD_R * 0.55));
+  const gy = Math.max(-0.06, Math.min(0.05, -eyes[1] * HEAD_R * 0.4));
 
   const eye = (side: 1 | -1) => {
-    const lid = side === 1 ? p.lidL : p.lidR;
-    const s = onSurface(side * 0.11, eyeY);
+    const lid = Math.min(0.92, Math.max(side === 1 ? p.lidL : p.lidR, blink));
+    const s = onSurface(side * 0.11 + gx, eyeY + gy);
     return (
       <group key={`eye${side}`} position={s.position} rotation={s.rotation}>
         <Ink scale={[p.eyeW, p.eyeH * (1 - lid), 1]} position={[0, -p.eyeH * lid * 0.5, 0]}>
           <circleGeometry args={[1, 24]} />
         </Ink>
-        {p.eyeW > 0.035 ? (
+        {p.eyeW > 0.035 && blink < 0.5 ? (
           <Ink color="#ffffff" position={[p.eyeW * 0.35, p.eyeH * 0.35 * (1 - lid), 0.001]} scale={0.012}>
             <circleGeometry args={[1, 12]} />
           </Ink>
@@ -133,7 +155,7 @@ export const Face: React.FC<{ face: FaceName; mouthOpen?: number; frame?: number
       {eye(-1)}
       {brow(1)}
       {brow(-1)}
-      <group position={ms.position} rotation={ms.rotation}>
+      <group position={ms.position} rotation={ms.rotation} scale={[morph, 1, 1]}>
         {mouth}
       </group>
       {p.tears

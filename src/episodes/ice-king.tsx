@@ -5,7 +5,7 @@ import { AbsoluteFill, Sequence } from "remotion";
 import shotsJson from "../../episodes/ice-king/03-shots.json";
 import wordsJson from "../../episodes/ice-king/04-words.json";
 import { Captions } from "../components/Captions";
-import { ShotView, type ShotLayout } from "../components/Shot";
+import { ShotView, type MotionVersion, type ShotLayout } from "../components/Shot";
 import { Soundtrack } from "../components/Soundtrack";
 import { placeCues } from "../lib/cues";
 import { CUES } from "./ice-king.cues";
@@ -96,7 +96,7 @@ for (const t of timings) {
 export const cues = placeCues(timings, CUES);
 const emphasis = new Set(timings.flatMap((t) => (t.emphasisWord === null ? [] : [t.emphasisWord])));
 
-export const IceKing: React.FC = () => (
+export const IceKing: React.FC<{ motion: MotionVersion }> = ({ motion }) => (
   <AbsoluteFill
     style={{
       backgroundColor: "black"
@@ -104,7 +104,7 @@ export const IceKing: React.FC = () => (
   >
     {timings.map((t) => (
       <Sequence key={t.shot.id} name={`${t.shot.id} · ${t.shot.beat}`} from={t.from} durationInFrames={t.durationInFrames}>
-        <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} />
+        <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} motion={motion} />
       </Sequence>
     ))}
     <Captions words={words} emphasis={emphasis} />

@@ -1,6 +1,7 @@
 // Unit checks for src/motion (run: npm test). Plain node:assert, no test runner.
 import assert from "node:assert/strict";
 import { blink, cameraTrack, gesture, SPRINGS, springTrack, type CameraKey, type Vec3 } from "../src/motion";
+import { characterMotion, type Performance } from "../src/motion/useCharacterMotion";
 
 const FPS = 30;
 const range = (a: number, b: number) => Array.from({ length: b - a }, (_, i) => a + i);
@@ -58,5 +59,25 @@ const w = (f: number) => gesture(f, FPS, { hitFrame: hit });
 assert.ok(Math.min(...range(hit - 10, hit - 1).map(w)) < 0, "gesture has no anticipation dip");
 assert.ok(Math.max(...range(hit, hit + 10).map(w)) > 1, "gesture has no overshoot after the hit");
 assert.ok(Math.abs(w(hit + 4 * FPS)) < 0.02, "gesture doesn't release back to rest");
+
+// characterMotion: every layer at once, rendered in any order, gives the same channels.
+const perf: Performance = {
+  seed: 42,
+  energy: 1.2,
+  actions: [{ action: "idle", from: 0, duration: 60 }, { action: "arms-cross-smug", from: 60, duration: 60 }],
+  gaze: [{ frame: 0, yaw: 0 }, { frame: 30, yaw: 0.6 }, { frame: 80, yaw: -0.3, pitch: 0.1 }],
+  gestures: [{ pose: "point", hitFrame: 40 }, { pose: "shrug", hitFrame: 95 }],
+  speaks: [{ w: "Ice?", start: 20, end: 32 }, { w: "tropics?", start: 36, end: 52 }],
+  stress: [36],
+  expressions: [{ frame: 0, face: "smug" }, { frame: 70, face: "shocked" }],
+};
+const fwd = range(0, 120).map((f) => JSON.stringify(characterMotion(f, FPS, perf)));
+const rev = range(0, 120).reverse().map((f) => JSON.stringify(characterMotion(f, FPS, perf))).reverse();
+assert.deepEqual(fwd, rev, "characterMotion depends on render order");
+const at = (f: number) => characterMotion(f, FPS, perf);
+assert.equal(at(10).mouth, 0, "mouth moves outside the character's own words");
+assert.ok(at(23).mouth > 0.3, "mouth closed mid-syllable while speaking");
+assert.ok(at(72).faceT > 0 && at(72).faceT < 1, "expression pops instead of blending");
+assert.ok(at(78).faceT > 0.95, "expression blend takes longer than ~8 frames");
 
 console.log("motion tests: all passed");
