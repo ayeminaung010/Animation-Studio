@@ -7,6 +7,7 @@ import wordsJson from "../../episodes/ice-king/04-words.json";
 import { Captions } from "../components/Captions";
 import { ShotView, type MotionVersion, type ShotLayout } from "../components/Shot";
 import { Soundtrack } from "../components/Soundtrack";
+import { fromV1Transition } from "../motion/Transition";
 import { placeCues } from "../lib/cues";
 import { CUES } from "./ice-king.cues";
 import { parseEpisode, parseWords } from "../lib/shots";
@@ -102,9 +103,10 @@ export const IceKing: React.FC<{ motion: MotionVersion }> = ({ motion }) => (
       backgroundColor: "black"
     }}
   >
-    {timings.map((t) => (
+    {timings.map((t, k) => (
       <Sequence key={t.shot.id} name={`${t.shot.id} · ${t.shot.beat}`} from={t.from} durationInFrames={t.durationInFrames}>
-        <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} motion={motion} />
+        <ShotView timing={t} characters={episode.characters} layout={LAYOUT[t.shot.id]} voice={VOICE} motion={motion}
+          transitionOut={timings[k + 1] ? fromV1Transition(timings[k + 1].shot.transition_in) : undefined} />
       </Sequence>
     ))}
     <Captions words={words} emphasis={emphasis} />

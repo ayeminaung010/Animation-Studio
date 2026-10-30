@@ -27,7 +27,8 @@ renders it. Read `README.md` for the layout and `SETUP.md` for commands.
   `Captions`, `Soundtrack`, `toon` (`T` = toon mesh with outline, `Ink` = flat black detail).
 - `src/motion/` — motion v2 (in progress, see `motion-upgrade/`): `motion-kit.ts` (copied from the
   bundle, don't edit), `useCharacterMotion.ts` (all layers for one character at one frame, on top of the
-  action pose), `gestures.ts` (15 gesture poses), `fromShot.ts` (default performance per shot). v1 is
+  action pose), `gestures.ts` (15 gesture poses), `fromShot.ts` (default performance per shot), `cameraTrack.ts` + `TrackCamera.tsx`
+  (continuous camera; knobs in `CAMERA`), `Transition.tsx` (FLYOVER/THROUGH/IRIS/MATCH/FLASH/WHIP/CUT). v1 is
   untouched when `motion` is "v1" (the composition default). Check v2 with `MOTION=v2 npm run stills -- <slug>`
   (→ `out/stills-v2/`), gesture poses with the `gesture-sheet` composition, and `npm test` after motion changes.
 - `src/sets/index.tsx`, `src/props/*` — the library. New props must be registered in

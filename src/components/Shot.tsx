@@ -5,7 +5,11 @@ import { ThreeCanvas } from "@remotion/three";
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { CharacterDef, Vec3 } from "../lib/shots";
-import { shotPerformances } from "../motion/fromShot";
+import { densify, moveKeys, type TrackSpec } from "../motion/cameraTrack";
+import { seedFor, shotPerformances } from "../motion/fromShot";
+import { SPRINGS, springStep } from "../motion/motion-kit";
+import { TrackCamera } from "../motion/TrackCamera";
+import { fromV1Transition, TransitionWrap, type TransitionType } from "../motion/Transition";
 import { characterMotion } from "../motion/useCharacterMotion";
 import { resolveAt, type ShotTiming, type StartAt } from "../lib/timing";
 import { propComponent } from "../props";
@@ -71,7 +75,9 @@ export const ShotView: React.FC<{
   voice: string;
   /** "v2" layers motion-kit performances (idle, gaze, blinks, follow-through) over the actions. */
   motion?: MotionVersion;
-}> = ({ timing, characters, layout, voice, motion = "v1" }) => {
+  /** v2: how this shot hands over to the next one (its out-half plays over the last frames). */
+  transitionOut?: TransitionType;
+}> = ({ timing, characters, layout, voice, motion = "v1", transitionOut }) => {
   const f = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const { shot, durationInFrames: d, emphasisFrame } = timing;
@@ -121,45 +127,101 @@ export const ShotView: React.FC<{
     .filter(({ place }) => !place.char)
     .map(({ name, place, i }) => propNode(name, place, `${name}-${i}`));
 
-  // Camera target: a layout override, a character in the shot, or a placed prop.
+  // Camera target at a frame: a layout override, a character in the shot, or a placed prop.
   const tName = shot.camera.target;
   const tChar = shot.characters.find((c) => c.id === tName);
-  let target: Vec3 = [0, 1.2, 0];
-  let isCharacter = false;
-  if (layout.target) {
-    target = layout.target;
-  } else if (tChar) {
-    // Aim at the head where the pose actually puts it (kneeling, sitting, leaning).
-    const pose = poseFor(tChar.action, f, d);
-    target = headWorld(tChar.pos, chars[tChar.id]?.offset, poseDrop(pose) + Math.max(0, pose.lean) * 0.55);
-    isCharacter = true;
-  } else {
-    const p = placed.find((x) => x.name === tName)?.place;
-    if (p?.char) {
-      const c = shot.characters.find((x) => x.id === p.char);
-      if (c) {
-        const facing = chars[c.id]?.facing ?? 0;
-        target = add(add(markWorld(c.pos, chars[c.id]?.offset), rotY(p.at ?? [0, 0, 0], facing)), p.focus);
+  const specAt = (fr: number): CameraSpec => {
+    let target: Vec3 = [0, 1.2, 0];
+    let isCharacter = false;
+    if (layout.target) {
+      target = layout.target;
+    } else if (tChar) {
+      // Aim at the head where the pose actually puts it (kneeling, sitting, leaning).
+      const pose = poseFor(tChar.action, fr, d);
+      target = headWorld(tChar.pos, chars[tChar.id]?.offset, poseDrop(pose) + Math.max(0, pose.lean) * 0.55);
+      isCharacter = true;
+    } else {
+      const p = placed.find((x) => x.name === tName)?.place;
+      if (p?.char) {
+        const c = shot.characters.find((x) => x.id === p.char);
+        if (c) {
+          const facing = chars[c.id]?.facing ?? 0;
+          target = add(add(markWorld(c.pos, chars[c.id]?.offset), rotY(p.at ?? [0, 0, 0], facing)), p.focus);
+        }
+      } else if (p) {
+        target = add(p.at ?? [0, 0, 0], p.focus);
       }
-    } else if (p) {
-      target = add(p.at ?? [0, 0, 0], p.focus);
     }
-  }
-
-  const spec: CameraSpec = {
-    move: shot.camera.move,
-    from: shot.camera.from,
-    to: shot.camera.to,
-    target,
-    isCharacter,
-    azimuth: layout.azimuth,
-    elevation: layout.elevation,
-    frameScale: layout.frameScale,
+    return {
+      move: shot.camera.move,
+      from: shot.camera.from,
+      to: shot.camera.to,
+      target,
+      isCharacter,
+      azimuth: layout.azimuth,
+      elevation: layout.elevation,
+      frameScale: layout.frameScale,
+    };
   };
 
   const SetC = set.component;
   const whip = shot.transition_in === "whip";
   const flash = shot.transition_in === "flash";
+  const v2 = motion === "v2";
+
+  // v2: one continuous track through the shot's move, handheld drift, an impact on "shake" shots.
+  const track: TrackSpec | null = v2
+    ? {
+      keys: densify(moveKeys(specAt, 0, d), fps),
+      seed: seedFor(shot.id),
+      shakes: shot.camera.move === "shake" ? [{ frame: emphasisFrame ?? 0, strength: 1 }] : [],
+    }
+    : null;
+
+  const scene = (
+    <ThreeCanvas width={width} height={height} gl={{ antialias: true }}>
+      <color attach="background" args={[bg]} />
+      <Lighting name={shot.lighting} bulb={layout.bulb} />
+      {track ? <TrackCamera track={track} frame={f} /> : <CameraRig spec={specAt(f)} frame={f} duration={d} />}
+      {/* No inner <Suspense>: ThreeCanvas's own boundary holds the frame until textures load. */}
+      <SetC f={f} />
+      {shot.characters.map((c) => {
+        const m = perfs ? characterMotion(f, fps, perfs[c.id]) : undefined;
+        return (
+          <Character
+            key={c.id}
+            def={characters[c.id]}
+            pos={c.pos}
+            face={c.face}
+            action={c.action}
+            frame={f}
+            duration={d}
+            mouthOpen={(m ? m.speaking : talks(c)) ? mouth : 0}
+            motion={m}
+            facing={chars[c.id]?.facing}
+            offset={chars[c.id]?.offset}
+            leftHand={slot(c.id, "L")}
+            rightHand={slot(c.id, "R")}
+            headwear={slot(c.id, "head")}
+            front={slot(c.id, "front")}
+          />
+        );
+      })}
+      {world}
+    </ThreeCanvas>
+  );
+
+  if (v2) {
+    // Emphasis punch springs in (a little overshoot) instead of a 4-frame linear zoom.
+    const punch = emphasisFrame === null ? 1 : 1 + 0.05 * springStep((f - emphasisFrame) / fps, SPRINGS.head);
+    return (
+      <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>
+        <TransitionWrap in={fromV1Transition(shot.transition_in)} out={transitionOut} frame={f} duration={d}>
+          <AbsoluteFill style={{ scale: punch }}>{scene}</AbsoluteFill>
+        </TransitionWrap>
+      </AbsoluteFill>
+    );
+  }
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>
@@ -171,36 +233,7 @@ export const ShotView: React.FC<{
           filter: whip ? `blur(${interpolate(f, [0, 6], [18, 0], clamp)}px)` : undefined,
         }}
       >
-        <ThreeCanvas width={width} height={height} gl={{ antialias: true }}>
-          <color attach="background" args={[bg]} />
-          <Lighting name={shot.lighting} bulb={layout.bulb} />
-          <CameraRig spec={spec} frame={f} duration={d} />
-          {/* No inner <Suspense>: ThreeCanvas's own boundary holds the frame until textures load. */}
-          <SetC f={f} />
-          {shot.characters.map((c) => {
-            const m = perfs ? characterMotion(f, fps, perfs[c.id]) : undefined;
-            return (
-            <Character
-              key={c.id}
-              def={characters[c.id]}
-              pos={c.pos}
-              face={c.face}
-              action={c.action}
-              frame={f}
-              duration={d}
-              mouthOpen={(m ? m.speaking : talks(c)) ? mouth : 0}
-              motion={m}
-              facing={chars[c.id]?.facing}
-              offset={chars[c.id]?.offset}
-              leftHand={slot(c.id, "L")}
-              rightHand={slot(c.id, "R")}
-              headwear={slot(c.id, "head")}
-              front={slot(c.id, "front")}
-            />
-            );
-          })}
-          {world}
-        </ThreeCanvas>
+        {scene}
       </AbsoluteFill>
       {flash ? (
         <AbsoluteFill style={{ backgroundColor: "white", opacity: interpolate(f, [0, 6], [0.9, 0], clamp) }} />

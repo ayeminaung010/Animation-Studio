@@ -45,14 +45,9 @@ export interface CameraSpec {
   frameScale?: number;
 }
 
-export const cameraAt = (spec: CameraSpec, frame: number, duration: number) => {
+/** The framing at progress `p` (0 = `from`, 1 = `to`) of the shot's move, without time-based extras (whip, shake). */
+export const framingAt = (spec: CameraSpec, p: number) => {
   const { move, from, to, target, isCharacter, azimuth = 0, elevation = 0.12, frameScale = 1 } = spec;
-  const p = interpolate(frame, [0, Math.max(1, duration - 1)], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.bezier(0.33, 0, 0.2, 1),
-  });
-
   const h1 = FRAME_H[from] * frameScale;
   let h2 = FRAME_H[to] * frameScale;
   if (move === "push-in" && h2 >= h1) h2 = h1 * 0.78;
@@ -83,6 +78,17 @@ export const cameraAt = (spec: CameraSpec, frame: number, duration: number) => {
     eye.add(off);
     aim.add(off);
   }
+  return { eye, aim, fov, h, side };
+};
+
+export const cameraAt = (spec: CameraSpec, frame: number, duration: number) => {
+  const { move } = spec;
+  const p = interpolate(frame, [0, Math.max(1, duration - 1)], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.bezier(0.33, 0, 0.2, 1),
+  });
+  const { eye, aim, fov, h, side } = framingAt(spec, p);
   if (move === "whip") {
     const w = interpolate(frame, [0, 7], [1, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
     aim.add(side.clone().multiplyScalar(h * 1.4 * w));

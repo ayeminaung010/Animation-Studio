@@ -1,6 +1,7 @@
 // Unit checks for src/motion (run: npm test). Plain node:assert, no test runner.
 import assert from "node:assert/strict";
 import { blink, cameraTrack, gesture, SPRINGS, springTrack, type CameraKey, type Vec3 } from "../src/motion";
+import { densify } from "../src/motion/cameraTrack";
 import { characterMotion, type Performance } from "../src/motion/useCharacterMotion";
 
 const FPS = 30;
@@ -48,10 +49,14 @@ const walk = (ks: CameraKey[], frames: number, maxStep: number) => {
   return Math.max(...steps);
 };
 walk(keys, 360, 0.02 * SCENE_SIZE);
-// Known limit, measured not asserted: a close → wide pull-out (7 units) peaks above 2% with kit defaults.
-// Phase 3 scales rampSec/leadSec with move distance for these.
-const pull = walk([keys[3], { ...WIDE, frame: 100 }], 200, Infinity);
-console.log(`cameraTrack close→wide peak step = ${((pull / SCENE_SIZE) * 100).toFixed(1)}% of scene size (limit 2%)`);
+// A close → wide pull-out (7 units) as two raw keys peaks above 2% (kit defaults);
+// densify() spreads it into steps, which must stay under 2% and still arrive on the key.
+const pullKeys: CameraKey[] = [{ ...keys[3], frame: 0 }, { ...WIDE, frame: 100 }];
+const raw = walk(pullKeys, 200, Infinity);
+const dense = densify(pullKeys, FPS);
+const smooth = walk(dense, 200, 0.02 * SCENE_SIZE);
+console.log(`camera close→wide peak step: raw ${((raw / SCENE_SIZE) * 100).toFixed(1)}%, densified ${((smooth / SCENE_SIZE) * 100).toFixed(1)}% (limit 2%)`);
+assert.ok(dist(cameraTrack(100 + 2 * FPS, FPS, dense).pos, WIDE.pos) < 0.08, "densified track doesn't settle on the wide");
 
 // gesture: dips below 0 before the hit (anticipation), exceeds 1 just after it (overshoot).
 const hit = 40;
