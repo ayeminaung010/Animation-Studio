@@ -414,6 +414,42 @@ def record_scratch():
     return peak_norm(fade(y * np.exp(-t / 0.25), 0.002, 0.05))
 
 
+def phone_ring():
+    """Classic two-tone desk-phone ring: two bursts of 440 + 480 Hz with a fast warble."""
+    out = np.zeros(int(2.2 * SR))
+    for k in range(2):
+        t = secs(0.8)
+        y = (np.sin(2 * np.pi * 440 * t) + np.sin(2 * np.pi * 480 * t)) * (0.7 + 0.3 * np.sign(np.sin(2 * np.pi * 20 * t)))
+        place(out, fade(y, 0.01, 0.04), k * 1.1)
+    return peak_norm(bp(out, 300, 3400))
+
+
+def hold_music():
+    """Cheesy hold music heard down the phone line: plucked C-major loop, band-limited like a call."""
+    beat = 0.32
+    melody = [523, 659, 784, 659, 698, 880, 784, 659, 587, 698, 659, 523, 587, 494, 523, 0]
+    bass = [131, 131, 175, 175, 147, 147, 131, 131]
+    out = np.zeros(int(len(melody) * beat * SR + SR))
+    for i, f in enumerate(melody):
+        if f:
+            place(out, pluck(f, beat * 1.6, bright=1.4) * 0.5, i * beat)
+    for i, f in enumerate(bass):
+        place(out, pluck(f, beat * 2.2, bright=0.6) * 0.6, i * beat * 2)
+    return peak_norm(fade(bp(out, 300, 3400), 0.01, 0.3))
+
+
+def keyboard_typing():
+    """Office keyboard: bursts of seeded key clicks."""
+    g = np.random.default_rng(23)
+    out = np.zeros(int(2.6 * SR))
+    t = 0.0
+    while t < 2.4:
+        click = bp(noise(0.03, int(g.integers(1 << 30))), 1800, 7000) * decay(0.03, 0.006)
+        place(out, click * g.uniform(0.5, 1.0), t)
+        t += g.uniform(0.06, 0.16) + (0.35 if g.random() < 0.08 else 0)
+    return peak_norm(out)
+
+
 def snore():
     d = 1.7
     t = secs(d)
@@ -545,6 +581,9 @@ SFX = {
     "church-bell": church_bell,
     "crow-caw": crow_caw,
     "record-scratch": record_scratch,
+    "phone-ring": phone_ring,
+    "hold-music": hold_music,
+    "keyboard-typing": keyboard_typing,
     "snore": snore,
     "horse-neigh": horse_neigh,
     "sword-draw": sword_draw,
