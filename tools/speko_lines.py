@@ -2,12 +2,14 @@
 """Dialogue voices with Speko: one clip per line, each speaker with their own voice.
 
 usage: python3 tools/speko_lines.py <slug> samples   (or: npm run lines -- <slug> samples)
+       python3 tools/speko_lines.py <slug> retime    (tempo change only, no Speko call)
        python3 tools/speko_lines.py <slug>           (or: npm run lines -- <slug>)
 Voices live in episodes/<slug>/04-voices.json ({model, speakers: {id: {candidates, voice, speed,
 instructions}}}); a line's `delivery` in 03-shots.json adds
 an acting note for that line. `samples` speaks each speaker's first 3 lines in every candidate voice →
 out/voice-samples/. The full run writes episodes/<slug>/voice-clips/NN-<speaker>.wav for every line,
-then join_lines.py + loudnorm → 04-words.json and public/episodes/<slug>/voice.mp3.
+(raw takes in voice-clips-raw/, a speaker's optional `tempo`
+applied), then join_lines.py + loudnorm → 04-words.json and public/episodes/<slug>/voice.mp3.
 Lines come from 03-shots.json, or from 02-script.md before the shot list exists (samples only).
 """
 import json, re, subprocess, sys, urllib.request
@@ -31,6 +33,11 @@ def line_notes(shots):
 
 def instructions(spk, note):
     return f"{spk['instructions']} This line: {note}" if note else spk["instructions"]
+
+
+def tempo_filter(spk):
+    """ffmpeg filter for a speaker's optional `tempo` (speed-up that keeps pitch)."""
+    return f"atempo={spk['tempo']}" if spk.get("tempo") else "anull"
 
 
 def script_segments(md):
@@ -74,9 +81,8 @@ def main():
     else: sys.exit(f"{shots_path} is missing — write the shot list before generating every line")
     for spk in {s for s, _ in segs} - set(cfg["speakers"]):
         sys.exit(f"speaker {spk!r} has no entry in {ep / '04-voices.json'}")
-    speko = Speko(api_key())
-
     if mode == "samples":
+        speko = Speko(api_key())
         out = ROOT / "out/voice-samples"
         out.mkdir(parents=True, exist_ok=True)
         for spk_id, spk in cfg["speakers"].items():
@@ -89,14 +95,24 @@ def main():
         print(f"done: {out}")
         return
 
-    for spk_id, spk in cfg["speakers"].items():
-        if not spk.get("voice"): sys.exit(f"pick a voice for {spk_id!r} in 04-voices.json first (samples: npm run lines -- {slug} samples)")
+    raw = ep / "voice-clips-raw"
+    if mode != "retime":  # retime: re-apply tempo to the clips already synthesized, no Speko call
+        for spk_id, spk in cfg["speakers"].items():
+            if not spk.get("voice"): sys.exit(f"pick a voice for {spk_id!r} in 04-voices.json first (samples: npm run lines -- {slug} samples)")
+        speko = Speko(api_key())
+        raw.mkdir(exist_ok=True)
+        for old in raw.glob("*.wav"): old.unlink()  # stale clips would shift every line after them
+        for i, (spk_id, text) in enumerate(segs):
+            print(f"{clip_name(i, spk_id)}: {text}")
+            synth(speko, cfg, cfg["speakers"][spk_id], cfg["speakers"][spk_id]["voice"], text, raw / clip_name(i, spk_id), notes[i])
     clips = ep / "voice-clips"
     clips.mkdir(exist_ok=True)
-    for old in clips.glob("*.wav"): old.unlink()  # stale clips would shift every line after them
-    for i, (spk_id, text) in enumerate(segs):
-        print(f"{clip_name(i, spk_id)}: {text}")
-        synth(speko, cfg, cfg["speakers"][spk_id], cfg["speakers"][spk_id]["voice"], text, clips / clip_name(i, spk_id), notes[i])
+    for old in clips.glob("*.wav"): old.unlink()
+    for i, (spk_id, _) in enumerate(segs):
+        name = clip_name(i, spk_id)
+        if not (raw / name).exists(): sys.exit(f"{raw / name} is missing — run npm run lines -- {slug}")
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", raw / name, "-af", tempo_filter(cfg["speakers"][spk_id]),
+                        "-c:a", "pcm_s16le", clips / name], check=True)
     subprocess.run([sys.executable, ROOT / "tools/join_lines.py", slug], check=True)
     (ROOT / f"public/episodes/{slug}").mkdir(parents=True, exist_ok=True)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", ep / "voice-joined.wav", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
