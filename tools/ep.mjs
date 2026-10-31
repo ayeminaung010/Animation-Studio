@@ -3,6 +3,7 @@
 // MOTION=v1|v2 picks the motion version for render/render:draft/qa (output out/<slug>-<motion>.mp4);
 // without it the composition's default renders to out/<slug>.mp4.
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 
 const [task, slug, ...rest] = process.argv.slice(2);
 if (!slug) {
@@ -14,6 +15,8 @@ const py = win ? "py" : "python3";
 const motion = process.env.MOTION;
 const name = motion ? `${slug}-${motion}` : slug;
 const mp4 = `out/${name}.mp4`;
+const shotsPath = `episodes/${slug}/03-shots.json`;
+const shotList = fs.existsSync(shotsPath) ? JSON.parse(fs.readFileSync(shotsPath, "utf8")) : {};
 const props = motion ? [`--props=${JSON.stringify({ motion })}`] : [];
 
 const steps = {
@@ -30,7 +33,9 @@ const steps = {
     [py, "tools/check_mix.py", "out/cues.json", ...rest],
   ],
   // Producer checklist, then motion QA (cuts, takes, frozen frames, abrupt starts, audio gaps, runtime).
-  qa: [[py, "tools/qa.py", slug, mp4], [py, "motion-upgrade/tools/motion_qa.py", mp4, "--target-sec", "60", ...rest]],
+  // 2D stickman episodes skip motion QA (it checks the 3D rig's takes); the runtime target comes from 03-shots.json.
+  qa: [[py, "tools/qa.py", slug, mp4], ...(shotList.style === "stickman-2d" ? []
+    : [[py, "motion-upgrade/tools/motion_qa.py", mp4, "--target-sec", String(shotList.target_sec ?? 60), ...rest]])],
 }[task];
 if (!steps) {
   console.error(`unknown task "${task}" (render, render:draft, stills, audio, voice, lines, mix:check, qa)`);

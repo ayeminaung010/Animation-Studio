@@ -25,9 +25,18 @@ def frame_at(mp4, t, out):
     run("ffmpeg", "-v", "error", "-y", "-ss", f"{t:.3f}", "-i", str(mp4), "-frames:v", "1", str(out))
 
 
+def length_ok(dur, target):
+    """Runtime window around the episode's target_sec (03-shots.json, default 60)."""
+    return target - 5 <= dur <= target + 6
+
+
+assert length_ok(60.0, 60) and length_ok(66.0, 60) and not length_ok(54.9, 60)
+assert length_ok(102.3, 100) and not length_ok(107.0, 100)
+
 def main():
     slug, mp4 = sys.argv[1], Path(sys.argv[2])
-    shots = json.loads((ROOT / f"episodes/{slug}/03-shots.json").read_text())["shots"]
+    episode = json.loads((ROOT / f"episodes/{slug}/03-shots.json").read_text())
+    shots, target = episode["shots"], episode.get("target_sec", 60)
     words = json.loads((ROOT / f"episodes/{slug}/04-words.json").read_text())
     qa = ROOT / "out/qa"
     results = []
@@ -50,7 +59,7 @@ def main():
     dur = float(probe["format"]["duration"])
     check("Format", v["width"] == 1080 and v["height"] == 1920 and v["codec_name"] == "h264" and v["r_frame_rate"] == "30/1",
           f'{v["width"]}×{v["height"]} {v["codec_name"]} {v["r_frame_rate"]} fps, audio {a["codec_name"] if a else "MISSING"}')
-    check("Length matches the chosen duration (60 s → 55–65 s of narration)", 55 <= dur <= 66, f"{dur:.2f} s")
+    check(f"Length matches the chosen duration ({target} s → {target - 5}–{target + 6} s)", length_ok(dur, target), f"{dur:.2f} s")
 
     # --- audio
     r = run("ffmpeg", "-hide_banner", "-i", str(mp4), "-af", "ebur128=peak=true", "-f", "null", "-")
