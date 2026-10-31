@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Dialogue voices with Speko: one clip per line, each speaker with their own voice.
+
+usage: python3 tools/speko_lines.py <slug> samples   (or: npm run lines -- <slug> samples)
+       python3 tools/speko_lines.py <slug>           (or: npm run lines -- <slug>)
+Voices live in episodes/<slug>/04-voices.json ({model, speakers: {id: {candidates, voice, speed,
+instructions}}}). `samples` speaks each speaker's first 3 lines in every candidate voice →
+out/voice-samples/. The full run writes episodes/<slug>/voice-clips/NN-<speaker>.wav for every line,
+then join_lines.py + loudnorm → 04-words.json and public/episodes/<slug>/voice.mp3.
+Lines come from 03-shots.json, or from 02-script.md before the shot list exists (samples only).
+"""
+import json, re, subprocess, sys, urllib.request
+from pathlib import Path
+
+from speko_voice import Speko, api_key, find_url
+
+ROOT = Path(__file__).resolve().parent.parent
+SAMPLE_LINES = 3
+
+
+def segments(shots):
+    """(speaker, text) per line in shot order — the same order join_lines.py reads clips in."""
+    return [(l["speaker"], l["text"]) for s in shots for l in s.get("lines") or [{"speaker": "narrator", "text": s["text"]}]]
+
+
+def script_segments(md):
+    """Lines of a 02-script.md: `[BEAT] speaker: text`, `(beat)` markers dropped."""
+    out = []
+    for line in md.splitlines():
+        m = re.match(r"\[[^\]]+\]\s*([a-z_]+):\s*(.+)", line)
+        if m: out.append((m[1], re.sub(r"\s*\(beat\)", "", m[2]).strip()))
+    return out
+
+
+def clip_name(i, speaker):
+    return f"{i + 1:02d}-{speaker}.wav"
+
+
+def synth(speko, cfg, spk, voice, text, out):
+    body = {"text": text, "voice": voice, "model": cfg["model"], "speed": spk["speed"], "instructions": spk["instructions"],
+            "intent": {"language": "en-US", "optimizeFor": "accuracy"},
+            "constraints": {"allowedProviders": {"tts": ["openai-tts"]}}}
+    res = speko.tool("audio.synthesize", {"body": body})
+    url = find_url(res) or sys.exit(f"no download url in synthesize result: {str(res)[:500]}")
+    raw = out.with_suffix(".audio")
+    urllib.request.urlretrieve(url, raw)
+    # One rate and channel count for every clip: join_lines.py asserts they match.
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", raw, "-ac", "1", "-ar", "24000", "-c:a", "pcm_s16le", out], check=True)
+    raw.unlink()
+
+
+def main():
+    if len(sys.argv) < 2: sys.exit("usage: python3 tools/speko_lines.py <slug> [samples]")
+    slug, mode = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else "all")
+    ep = ROOT / f"episodes/{slug}"
+    cfg = json.loads((ep / "04-voices.json").read_text())
+    shots_path = ep / "03-shots.json"
+    if shots_path.exists(): segs = segments(json.loads(shots_path.read_text())["shots"])
+    elif mode == "samples": segs = script_segments((ep / "02-script.md").read_text())
+    else: sys.exit(f"{shots_path} is missing — write the shot list before generating every line")
+    for spk in {s for s, _ in segs} - set(cfg["speakers"]):
+        sys.exit(f"speaker {spk!r} has no entry in {ep / '04-voices.json'}")
+    speko = Speko(api_key())
+
+    if mode == "samples":
+        out = ROOT / "out/voice-samples"
+        out.mkdir(parents=True, exist_ok=True)
+        for spk_id, spk in cfg["speakers"].items():
+            lines = [t for s, t in segs if s == spk_id][:SAMPLE_LINES]
+            for voice in spk["candidates"]:
+                for n, text in enumerate(lines, 1):
+                    path = out / f"{spk_id}-{voice}-{n}.wav"
+                    print(f"sample {path.name}: {text}")
+                    synth(speko, cfg, spk, voice, text, path)
+        print(f"done: {out}")
+        return
+
+    for spk_id, spk in cfg["speakers"].items():
+        if not spk.get("voice"): sys.exit(f"pick a voice for {spk_id!r} in 04-voices.json first (samples: npm run lines -- {slug} samples)")
+    clips = ep / "voice-clips"
+    clips.mkdir(exist_ok=True)
+    for old in clips.glob("*.wav"): old.unlink()  # stale clips would shift every line after them
+    for i, (spk_id, text) in enumerate(segs):
+        print(f"{clip_name(i, spk_id)}: {text}")
+        synth(speko, cfg, cfg["speakers"][spk_id], cfg["speakers"][spk_id]["voice"], text, clips / clip_name(i, spk_id))
+    subprocess.run([sys.executable, ROOT / "tools/join_lines.py", slug], check=True)
+    (ROOT / f"public/episodes/{slug}").mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", ep / "voice-joined.wav", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
+                    "-ar", "44100", "-ac", "1", "-b:a", "192k", ROOT / f"public/episodes/{slug}/voice.mp3"], check=True)
+    print(f"done: episodes/{slug}/04-words.json, public/episodes/{slug}/voice.mp3")
+
+
+if __name__ == "__main__":
+    main()

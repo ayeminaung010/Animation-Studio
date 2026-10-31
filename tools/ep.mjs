@@ -1,5 +1,5 @@
 // One entry point so every npm script takes the episode slug.
-// usage: npm run <render|render:draft|stills|audio|voice|mix:check|qa> -- <slug> [extra args]
+// usage: npm run <render|render:draft|stills|audio|voice|lines|mix:check|qa> -- <slug> [extra args]
 // MOTION=v1|v2 picks the motion version for render/render:draft/qa (output out/<slug>-<motion>.mp4);
 // without it the composition's default renders to out/<slug>.mp4.
 import { execFileSync } from "node:child_process";
@@ -24,6 +24,7 @@ const steps = {
   stills: [["node", "tools/stills.mjs", slug, ...(rest.length ? rest : ["0.6"])]],
   audio: [[py, "tools/make_audio.py", slug]],
   voice: [[py, "tools/speko_voice.py", slug]],
+  lines: [[py, "tools/speko_lines.py", slug, ...rest]],
   "mix:check": [
     ["node", "tools/run-ts.mjs", "tools/dump-cues.ts", slug, "out/cues.json"],
     [py, "tools/check_mix.py", "out/cues.json", ...rest],
@@ -32,7 +33,7 @@ const steps = {
   qa: [[py, "tools/qa.py", slug, mp4], [py, "motion-upgrade/tools/motion_qa.py", mp4, "--target-sec", "60", ...rest]],
 }[task];
 if (!steps) {
-  console.error(`unknown task "${task}" (render, render:draft, stills, audio, voice, mix:check, qa)`);
+  console.error(`unknown task "${task}" (render, render:draft, stills, audio, voice, lines, mix:check, qa)`);
   process.exit(1);
 }
 

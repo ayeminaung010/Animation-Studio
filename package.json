@@ -43,6 +43,7 @@
     "render": "node tools/ep.mjs render",
     "audio": "node tools/ep.mjs audio",
     "voice": "node tools/ep.mjs voice",
+    "lines": "node tools/ep.mjs lines",
     "mix:check": "node tools/ep.mjs mix:check",
     "qa": "node tools/ep.mjs qa",
     "clean": "node tools/clean.mjs",

@@ -72,26 +72,31 @@ def find_url(x):
         if (u := find_url(v)): return u
 
 
-slug = sys.argv[1] if len(sys.argv) > 1 else sys.exit("usage: python3 tools/speko_voice.py <slug>")
-ep = ROOT / f"episodes/{slug}"
-body = json.loads((ep / "04-voice-request.json").read_text())
-tr_opts = body.pop("_transcribe", {})
+def main():
+    slug = sys.argv[1] if len(sys.argv) > 1 else sys.exit("usage: python3 tools/speko_voice.py <slug>")
+    ep = ROOT / f"episodes/{slug}"
+    body = json.loads((ep / "04-voice-request.json").read_text())
+    tr_opts = body.pop("_transcribe", {})
 
-speko = Speko(api_key())
-print("synthesizing…")
-audio = speko.tool("audio.synthesize", {"body": body})
-url = find_url(audio) or sys.exit(f"no download url in synthesize result: {str(audio)[:500]}")
-urllib.request.urlretrieve(url, ep / "voice-raw.audio")
-subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", ep / "voice-raw.audio", "-ac", "1", "-c:a", "pcm_s16le",
-                ep / "voice-raw.wav"], check=True)
+    speko = Speko(api_key())
+    print("synthesizing…")
+    audio = speko.tool("audio.synthesize", {"body": body})
+    url = find_url(audio) or sys.exit(f"no download url in synthesize result: {str(audio)[:500]}")
+    urllib.request.urlretrieve(url, ep / "voice-raw.audio")
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", ep / "voice-raw.audio", "-ac", "1", "-c:a", "pcm_s16le",
+                    ep / "voice-raw.wav"], check=True)
 
-print("transcribing…")
-tr = speko.tool("audio.transcribe", {"audio_url": url, "word_timestamps": True,
-                                     "language": tr_opts.get("language", "en"), "keywords": tr_opts.get("keywords")})
-(ep / "transcript.json").write_text(json.dumps(tr, indent=1))
+    print("transcribing…")
+    tr = speko.tool("audio.transcribe", {"audio_url": url, "word_timestamps": True,
+                                         "language": tr_opts.get("language", "en"), "keywords": tr_opts.get("keywords")})
+    (ep / "transcript.json").write_text(json.dumps(tr, indent=1))
 
-subprocess.run([sys.executable, ROOT / "tools/align_words.py", "transcript.json", "voice-raw.wav"], cwd=ep, check=True)
-(ROOT / f"public/episodes/{slug}").mkdir(parents=True, exist_ok=True)
-subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", ep / "voice-padded.wav", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
-                "-ar", "44100", "-ac", "1", "-b:a", "192k", ROOT / f"public/episodes/{slug}/voice.mp3"], check=True)
-print(f"done: episodes/{slug}/04-words.json, public/episodes/{slug}/voice.mp3")
+    subprocess.run([sys.executable, ROOT / "tools/align_words.py", "transcript.json", "voice-raw.wav"], cwd=ep, check=True)
+    (ROOT / f"public/episodes/{slug}").mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", ep / "voice-padded.wav", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
+                    "-ar", "44100", "-ac", "1", "-b:a", "192k", ROOT / f"public/episodes/{slug}/voice.mp3"], check=True)
+    print(f"done: episodes/{slug}/04-words.json, public/episodes/{slug}/voice.mp3")
+
+
+if __name__ == "__main__":
+    main()
