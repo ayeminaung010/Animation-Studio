@@ -7,7 +7,7 @@ import type { Job } from "../server/types.ts";
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "studio-engines-"));
 process.env.STUDIO_DATA = tmp;
-const { slugify, listLemoStyles, findOutputs, projectDir, planDocPath, finalizeLemo, isSlugTaken } = await import(
+const { slugify, listLemoStyles, findOutputs, projectDir, planDocPath, finalizeLemo, isSlugTaken, cleanEpisode } = await import(
   "../server/engines.ts"
 );
 const { REPO } = await import("../server/paths.ts");
@@ -119,4 +119,23 @@ test("finalizeLemo copies the film to out/<slug>.mp4", () => {
   } finally {
     fs.rmSync(target, { force: true });
   }
+});
+
+test("cleanEpisode keeps only a lemo film's video and subtitles", async () => {
+  const job = lemoJob("tidy-film");
+  const dir = projectDir(job);
+  fs.mkdirSync(path.join(dir, "stills"), { recursive: true });
+  for (const f of ["tidy-film.mp4", "tidy-film.srt", "TREATMENT.md", "stills/a.jpg"]) fs.writeFileSync(path.join(dir, f), "x");
+  await cleanEpisode(job);
+  assert.deepEqual(fs.readdirSync(dir).sort(), ["tidy-film.mp4", "tidy-film.srt"]);
+});
+
+test("cleanEpisode discard removes a whole lemo film, and is fine with nothing to clean", async () => {
+  const job = lemoJob("dropped-film");
+  fs.mkdirSync(projectDir(job), { recursive: true });
+  fs.writeFileSync(path.join(projectDir(job), "TREATMENT.md"), "x");
+  await cleanEpisode(job, true);
+  assert.ok(!fs.existsSync(projectDir(job)));
+  await cleanEpisode(job, true);
+  await cleanEpisode({ ...job, engine: "remotion", slug: "no-such-episode-zz" }, true);
 });

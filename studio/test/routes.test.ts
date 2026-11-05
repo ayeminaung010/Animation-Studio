@@ -50,6 +50,8 @@ const hub = new Hub();
 let suggestImpl: (idea: string) => Promise<{ engine: "remotion" | "lemo"; style?: string; reason: string }> =
   async () => ({ engine: "lemo", style: "blueprint", reason: "fits" });
 
+const cleaned: string[] = [];
+
 let handler: (req: http.IncomingMessage, res: http.ServerResponse) => void = () => {};
 const server = http.createServer((req, res) => handler(req, res));
 let port = 0;
@@ -117,6 +119,7 @@ before(async () => {
     hub,
     port,
     suggest: (idea) => suggestImpl(idea),
+    clean: async (job, discard) => void cleaned.push(`${job.slug}${discard ? ":discard" : ""}`),
     webDir,
   });
 });
@@ -542,4 +545,34 @@ test("a Job from the store keeps its shape through the API", async () => {
   const job: Job = r.json.job;
   assert.equal(job.slug, "a-bus-that-never-arrives");
   assert.equal(job.engine, "remotion");
+});
+
+test("clean: only done jobs with a video, never while another job runs, once", async () => {
+  for (const r of store.list()) if (r.status === "running") store.update(r.id, { status: "done" });
+  const j = store.create({ idea: "a film to clean up", engine: "lemo", style: "blueprint", seconds: 30, slug: "clean-film" });
+  assert.equal((await call("POST", `/api/jobs/${j.id}/clean`)).status, 409); // running
+  store.update(j.id, { status: "done" });
+  assert.match((await call("POST", `/api/jobs/${j.id}/clean`)).json.error, /no final video/);
+  const dir = path.join(dataDir, "films", "clean-film");
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "clean-film.mp4"), "x");
+  const other = store.create({ idea: "busy job meanwhile", engine: "remotion", seconds: 30, slug: "busy-job" });
+  assert.equal((await call("POST", `/api/jobs/${j.id}/clean`)).status, 409); // other job running
+  store.update(other.id, { status: "done" });
+  const ok = await call("POST", `/api/jobs/${j.id}/clean`);
+  assert.equal(ok.status, 200);
+  assert.equal(typeof ok.json.cleanedAt, "number");
+  assert.deepEqual(cleaned, ["clean-film"]);
+  assert.equal((await call("POST", `/api/jobs/${j.id}/clean`)).status, 409);
+});
+
+test("delete: only stopped jobs; discards their files and removes the job", async () => {
+  for (const r of store.list()) if (r.status === "running") store.update(r.id, { status: "done" });
+  const j = store.create({ idea: "an abandoned idea here", engine: "remotion", seconds: 30, slug: "abandoned" });
+  assert.equal((await call("POST", `/api/jobs/${j.id}/delete`)).status, 409); // running
+  store.update(j.id, { status: "stopped" });
+  assert.equal((await call("POST", `/api/jobs/${j.id}/delete`)).status, 200);
+  assert.equal(cleaned.at(-1), "abandoned:discard");
+  assert.equal((await call("GET", `/api/jobs/${j.id}`)).status, 404);
+  assert.ok(!fs.existsSync(path.join(dataDir, "jobs", j.id)));
 });

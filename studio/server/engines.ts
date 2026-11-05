@@ -1,5 +1,7 @@
+import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { promisify } from "node:util";
 import { FILMS, LEMO_LIB, REPO } from "./paths.ts";
 import type { Job, Outputs } from "./types.ts";
 
@@ -76,6 +78,28 @@ export function finalizeLemo(job: Job): void {
   const outDir = path.join(REPO, "out");
   fs.mkdirSync(outDir, { recursive: true });
   fs.copyFileSync(src, path.join(outDir, `${job.slug}.mp4`));
+}
+
+/**
+ * Deletes an episode's working files and keeps its final video (and subtitles).
+ * `discard` is for abandoned jobs: the lemo film folder goes entirely, and having nothing to clean is fine.
+ */
+export async function cleanEpisode(job: Job, discard = false): Promise<void> {
+  if (job.engine === "remotion") {
+    // tools/clean.mjs owns the list (story data, voice, music, episode code, Root.tsx entry, stills).
+    try {
+      await promisify(execFile)(process.execPath, ["tools/clean.mjs", job.slug, "--yes"], { cwd: REPO });
+    } catch (e) {
+      if (!(discard && /nothing to clean/.test(String((e as { stderr?: string }).stderr)))) throw e;
+    }
+    return;
+  }
+  const dir = projectDir(job);
+  if (discard) return fs.rmSync(dir, { recursive: true, force: true });
+  const keep = new Set([`${job.slug}.mp4`, `${job.slug}.srt`]);
+  for (const name of fs.readdirSync(dir)) {
+    if (!keep.has(name)) fs.rmSync(path.join(dir, name), { recursive: true, force: true });
+  }
 }
 
 export interface LemoStyle {

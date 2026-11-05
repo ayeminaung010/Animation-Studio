@@ -83,6 +83,12 @@ export class JobStore {
     return next;
   }
 
+  remove(id: string): void {
+    this.jobs.delete(id);
+    this.eventCounts.delete(id);
+    fs.rmSync(this.dirOf(id), { recursive: true, force: true });
+  }
+
   appendEvent(id: string, ev: JobEvent): number {
     if (!this.jobs.has(id)) throw new JobError(404, `no such job: ${id}`);
     const index = this.countEvents(id);

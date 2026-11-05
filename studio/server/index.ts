@@ -1,6 +1,6 @@
 import http from "node:http";
 import path from "node:path";
-import { isSlugTaken } from "./engines.ts";
+import { cleanEpisode, isSlugTaken } from "./engines.ts";
 import { JobStore } from "./jobs.ts";
 import { DATA, REPO } from "./paths.ts";
 import { createHandler } from "./routes.ts";
@@ -23,6 +23,7 @@ const handler = createHandler({
   hub,
   port,
   suggest: makeSuggest(),
+  clean: cleanEpisode,
   webDir: path.join(REPO, "studio", "web"),
 });
 

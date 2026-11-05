@@ -70,6 +70,8 @@ export const api = {
     request<unknown>("POST", `/api/jobs/${encodeURIComponent(id)}/revise`, { notes }),
   retry: (id: string) => request<unknown>("POST", `/api/jobs/${encodeURIComponent(id)}/retry`),
   stop: (id: string) => request<unknown>("POST", `/api/jobs/${encodeURIComponent(id)}/stop`),
+  clean: (id: string) => request<Job>("POST", `/api/jobs/${encodeURIComponent(id)}/clean`),
+  deleteJob: (id: string) => request<unknown>("POST", `/api/jobs/${encodeURIComponent(id)}/delete`),
   styles: () => request<LemoStyle[]>("GET", "/api/styles"),
   suggest: (idea: string) => request<Suggestion>("POST", "/api/suggest", { idea }),
   eventsUrl: (id: string) => `/api/jobs/${encodeURIComponent(id)}/events`,

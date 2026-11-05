@@ -17,6 +17,7 @@ export interface Deps {
   hub: Hub;
   port: number;
   suggest: (idea: string) => Promise<{ engine: Engine; style?: string; reason: string }>;
+  clean: (job: Job, discard?: boolean) => Promise<void>;
   webDir: string;
 }
 
@@ -248,7 +249,16 @@ function serveEvents(req: IncomingMessage, res: ServerResponse, deps: Deps, job:
 
 const JOBS = "/api/jobs";
 const JOB_RE = /^\/api\/jobs\/([A-Za-z0-9_-]+)$/;
-const JOB_ACTION_RE = /^\/api\/jobs\/([A-Za-z0-9_-]+)\/(events|approve|revise|retry|stop)$/;
+const JOB_ACTION_RE = /^\/api\/jobs\/([A-Za-z0-9_-]+)\/(events|approve|revise|retry|stop|clean|delete)$/;
+
+async function cleanOrThrow(deps: Deps, job: Job, discard: boolean): Promise<void> {
+  try {
+    await deps.clean(job, discard);
+  } catch (e) {
+    const stderr = (e as { stderr?: string }).stderr?.trim();
+    throw new JobError(500, `clean failed: ${stderr || (e instanceof Error ? e.message : String(e))}`);
+  }
+}
 
 async function route(req: IncomingMessage, res: ServerResponse, deps: Deps): Promise<void> {
   const raw = req.url ?? "/";
@@ -314,6 +324,26 @@ async function route(req: IncomingMessage, res: ServerResponse, deps: Deps): Pro
 
       if (action === "stop") {
         if (!runner.stop(job.id)) throw new JobError(409, "job is not running");
+        return sendJson(res, 200, { ok: true });
+      }
+
+      if (action === "clean") {
+        if (job.status !== "done") throw new JobError(409, `job is ${job.status}; only done jobs can be cleaned`);
+        if (job.cleanedAt) throw new JobError(409, "this episode was already cleaned");
+        // clean.mjs also empties the shared out/stills, which a running job may be writing to.
+        const conflict = runningConflict(store);
+        if (conflict) throw conflict;
+        if (!findOutputs(job).video) throw new JobError(409, "no final video found; render it before cleaning");
+        await cleanOrThrow(deps, job, false);
+        return sendJson(res, 200, store.update(job.id, { cleanedAt: Date.now() }));
+      }
+
+      if (action === "delete") {
+        if (job.status !== "stopped") throw new JobError(409, `job is ${job.status}; only stopped jobs can be deleted`);
+        const conflict = runningConflict(store);
+        if (conflict) throw conflict;
+        await cleanOrThrow(deps, job, true);
+        store.remove(job.id);
         return sendJson(res, 200, { ok: true });
       }
 

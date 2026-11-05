@@ -312,6 +312,25 @@ export function JobView({
             <button type="button" className="btn btn--primary" disabled={busy} onClick={() => void act(() => api.retry(id))}>
               Retry
             </button>
+            {job.status === "stopped" && (
+              <button
+                type="button"
+                className="btn btn--danger"
+                disabled={busy}
+                onClick={() => {
+                  const ok = window.confirm(
+                    `Delete "${job.slug}" and all its files (story data, voice, music, episode code, stills)? This can't be undone.`,
+                  );
+                  if (ok)
+                    void act(async () => {
+                      await api.deleteJob(id);
+                      window.location.hash = "#/new";
+                    });
+                }}
+              >
+                Delete job
+              </button>
+            )}
           </div>
         </section>
       )}
@@ -375,6 +394,28 @@ export function JobView({
             )}
           </p>
           <Stills paths={outputs?.stills ?? []} version={version} />
+          {job.cleanedAt ? (
+            <p className="muted">Working files removed. Only the final video is kept.</p>
+          ) : (
+            outputs?.video && (
+              <div className="actions">
+                <button
+                  type="button"
+                  className="btn btn--danger"
+                  disabled={busy}
+                  onClick={() => {
+                    const ok = window.confirm(
+                      `Delete the working files for "${job.slug}" (story data, voice, music, episode code, stills)? ` +
+                        "Only the final video is kept, and the episode can't be re-rendered afterwards.",
+                    );
+                    if (ok) void act(() => api.clean(id));
+                  }}
+                >
+                  Clean up episode files
+                </button>
+              </div>
+            )
+          )}
         </section>
       )}
 

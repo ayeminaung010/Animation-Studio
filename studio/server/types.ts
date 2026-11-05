@@ -24,6 +24,8 @@ export interface Job {
   error?: string;
   createdAt: number;
   phaseStartedAt: number;
+  /** Set once the episode's working files were deleted (only the video and subtitles remain). */
+  cleanedAt?: number;
 }
 
 export type JobEvent =
