@@ -8,7 +8,10 @@ Captions use the script's exact words; timings come from the transcript.
 import json, re, sys, wave
 
 transcript, raw_wav = sys.argv[1], sys.argv[2]
-shots = json.load(open("03-shots.json"))["shots"]
+try:
+    shots = json.load(open("03-shots.json"))["shots"]
+except FileNotFoundError:  # engine-contract episodes (project.json): the beats carry the script text
+    shots = json.load(open("project.json"))["beats"]
 T = json.load(open(transcript))["words"]
 
 toks, pause_after = [], {}

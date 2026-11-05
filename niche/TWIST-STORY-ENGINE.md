@@ -1,6 +1,6 @@
 # 3D Twist-Story Shorts Engine — Universal Prompt
 
-Oct 30, 2026 · @Lumora
+Oct 30, 2026
 
 ## How to use this prompt
 

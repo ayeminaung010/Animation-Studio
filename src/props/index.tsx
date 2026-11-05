@@ -16,9 +16,17 @@ import {
 } from "./ice";
 import { PiggyBank, PiggyCracking, PiggyOnScale } from "./piggy";
 import { DollarBills, FloatingReceipt, GoldCoinPile, ReceiptAvalanche, ReceiptHero, ReceiptPile } from "./receipts";
+import {
+  BallToss, DazzleWarship, GazeMark, GhostShip, Lifebuoy, PaintBucket, Paintbrush, Periscope, PeriscopeColumn, Scaffold, ShipBell,
+  Torpedo, UboatCutaway,
+} from "./dazzle";
 import type { PropProps } from "./types";
 import { BackDoor, BigMirror, Boots, HorsePacked, Sword } from "./wedding";
 import { BakeryFront, BreadOven, Cottage, Doorway, ManorWindow, ValleyRoad } from "./village";
+import {
+  Binoculars, Briefcase, Chair, Cigarette, CoatRack, DeadBody, DeadBodyWater, DeskLamp, Destroyer, Dossier, Envelope, FakeOrders,
+  FishingBoat, LandingCraft, MapWall, MorgueTruck, Pen, RadioSet, Searchlight, Slab, Stamp, SubmarineRail, Telegram,
+} from "./ww2";
 
 export const PROPS: Record<string, React.FC<PropProps>> = {
   "floating-receipt": FloatingReceipt,
@@ -110,6 +118,45 @@ export const PROPS: Record<string, React.FC<PropProps>> = {
   "drink-glass": DrinkGlass,
   "sawdust-macro": SawdustMacro,
   "picnic-cooler": PicnicCooler,
+  dead_body: DeadBody,
+  dead_body_water: DeadBodyWater,
+  dossier: Dossier,
+  briefcase: Briefcase,
+  fake_orders: FakeOrders,
+  map_wall: MapWall,
+  fishing_boat: FishingBoat,
+  destroyer: Destroyer,
+  landing_craft: LandingCraft,
+  radio_set: RadioSet,
+  telegram: Telegram,
+  envelope: Envelope,
+  stamp: Stamp,
+  pen: Pen,
+  cigarette: Cigarette,
+  binoculars: Binoculars,
+  morgue_truck: MorgueTruck,
+  searchlight: Searchlight,
+  submarine_rail: SubmarineRail,
+  slab: Slab,
+  desk_lamp: DeskLamp,
+  chair: Chair,
+  coat_rack: CoatRack,
+  clock: WallClock,
+  dazzle_warship: DazzleWarship,
+  ghost_ship: GhostShip,
+  scaffold: Scaffold,
+  paintbrush: Paintbrush,
+  paint_bucket: PaintBucket,
+  periscope: Periscope,
+  periscope_column: PeriscopeColumn,
+  uboat: UboatCutaway,
+  torpedo: Torpedo,
+  ball: BallToss,
+  lifebuoy: Lifebuoy,
+  ship_bell: ShipBell,
+  chart_table: Table,
+  god_rays: GodRays,
+  deck_rail: GazeMark,
 };
 
 export const propComponent = (name: string): React.FC<PropProps> => {

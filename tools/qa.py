@@ -32,6 +32,15 @@ def length_ok(dur, target):
 
 assert length_ok(60.0, 60) and length_ok(66.0, 60) and not length_ok(54.9, 60)
 assert length_ok(102.3, 100) and not length_ok(107.0, 100)
+def repeated_framings(shots, style):
+    """Shot ids whose framing repeats the previous shot's; None for 2D episodes (framing lives in their LAYOUT)."""
+    if style == "stickman-2d": return None
+    return [shots[k]["id"] for k in range(1, len(shots)) if shots[k]["camera"]["from"] == shots[k - 1]["camera"]["from"]]
+
+
+assert repeated_framings([{"id": "a", "camera": {"from": "wide"}}, {"id": "b", "camera": {"from": "wide"}}], None) == ["b"]
+assert repeated_framings([{"id": "a", "camera": {"from": "medium"}}, {"id": "b", "camera": {"from": "medium"}}], "stickman-2d") is None
+
 
 def main():
     slug, mp4 = sys.argv[1], Path(sys.argv[2])
@@ -100,8 +109,9 @@ def main():
     check("No flicker or jitter", not bad, "no frame-to-frame spikes inside any shot" if not bad else f"spikes in {bad}")
 
     # --- framing & pace (from the shot list the render was built from)
-    same = [shots[k]["id"] for k in range(1, len(shots)) if shots[k]["camera"]["from"] == shots[k - 1]["camera"]["from"]]
-    check("No two identical framings in a row", not same, "every cut changes framing" if not same else str(same))
+    same = repeated_framings(shots, episode.get("style"))
+    if same is None: print("[SKIP] No two identical framings in a row: 2D episode, rooms and cutaways are set in its LAYOUT")
+    else: check("No two identical framings in a row", not same, "every cut changes framing" if not same else str(same))
     lens = [((starts[k + 1] if k + 1 < len(starts) else end) - starts[k]) / FPS for k in range(len(shots))]
     tw = next(k for k, s in enumerate(shots) if s["beat"] == "TWIST" and s["camera"]["move"] == "dolly-zoom")
     check("Twist shot is slower; button ends hard", lens[tw] >= 3.0 and lens[tw] > np.median(lens),

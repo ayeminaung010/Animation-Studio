@@ -1,19 +1,17 @@
 import React from "react";
 import { Composition, Folder } from "remotion";
-import { DURATION, episode, IceKing } from "./episodes/ice-king";
 import { GestureSheet } from "./lab/GestureSheet";
 import { LookTest } from "./lab/LookTest";
 import { MOTION_TEST_FRAMES, MotionTest } from "./lab/MotionTest";
 import { StickSheet } from "./lab/StickSheet";
+import { DURATION as PAINTBRUSH_FRAMES, PaintbrushSubmarine } from "./episodes/paintbrush-submarine";
 
 // One <Composition> per episode (skeleton in SETUP.md §5).
 export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Folder name="Episodes">
-        <Composition id={episode.slug} component={IceKing} durationInFrames={DURATION}
-          fps={episode.fps} width={episode.width} height={episode.height}
-          defaultProps={{ motion: "v1" as const }} />
+        <Composition id="paintbrush-submarine" component={PaintbrushSubmarine} durationInFrames={PAINTBRUSH_FRAMES} fps={30} width={1080} height={1920} />
       </Folder>
       <Composition id="look-test" component={LookTest} durationInFrames={90} fps={30} width={1080} height={1920}
         defaultProps={{ set: "generic-living-room" }} />

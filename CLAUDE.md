@@ -54,6 +54,18 @@ renders it. Read `README.md` for the layout and `SETUP.md` for commands.
 - Captions sit at 55% height (motion v2: 70%, one yellow word per sentence; a console warning names
   any scene/word where the band covers a face) inside the 7–85% width safe area; keep key action out of the bottom
   20% and right 15% (YouTube buttons).
+- Every episode carries the channel watermark **@InkwellLife**, from frame 0 to the end, layered above
+  the picture and captions: `<GlassWatermark />` (`src/components/GlassWatermark.tsx`, frosted-glass pill,
+  low opacity, top-left at 7% / 4.5%) in 3D episodes; `src/stick/Watermark.tsx` in 2D stickman episodes.
+  Keep faces and key action clear of that corner.
+- Every episode ends with a call to action: right after the punchline the narrator says one line, by default
+  "Like and subscribe for more." (~2 s, part of the script, the word budget and the runtime target), while a small
+  like/subscribe card in the same glass style as the watermark pops in above the captions. The picture keeps moving
+  under it (no freeze, no separate end screen), and nothing else follows it.
+- Engine-contract episodes (`niche/TOON-3D.md`) render straight from `episodes/<slug>/project.json` through
+  `loadProject` (`src/lib/project.ts`: contract units × 1.75 → world, grade → lighting); check them with
+  `node tools/run-ts.mjs tools/check-project.ts <slug>` (`--words` after TTS). Voice: `npm run voice -- <slug>`,
+  then `python3 tools/tighten_vo.py <slug>` to close pauses over 0.25 s before re-checking.
 
 ## Mix targets
 

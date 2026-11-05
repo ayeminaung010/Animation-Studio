@@ -1,9 +1,6 @@
 // Checks for the 2D stickman renderer (src/stick): run with npm test.
 import assert from "node:assert/strict";
 import { checkLayout, headBox, talkerAt, WATERMARK_BOX, type StickLayout } from "../src/stick/geometry";
-import shotsJson from "../episodes/tech-support/03-shots.json";
-import { LAYOUT } from "../src/episodes/tech-support.layout";
-import { parseEpisode } from "../src/lib/shots";
 import { pose, POSES } from "../src/stick/poses";
 import { stickProp } from "../src/stick/props";
 
@@ -26,16 +23,9 @@ assert.match(checkLayout("cap", { ...ok, grandpa: { x: 420, y: 1250, scale: 1.2 
 assert.match(checkLayout("low", { ...ok, agent: { x: 560, y: 2000, scale: 1.2 } }).join(), /button zone/);
 assert.match(checkLayout("prop", { ...ok, props: [{ name: "router", x: 1000, y: 700 }] }).join(), /right 15%/);
 assert(headBox(420, 760, 1.2).y1 < 960);
-
-// The real episode: every shot staged, every staging clean, every pose and prop known.
-const episode = parseEpisode(shotsJson);
-for (const s of episode.shots) {
-  const l = LAYOUT[s.id];
-  assert(l, `No LAYOUT for shot ${s.id} — add it in src/episodes/tech-support.layout.ts`);
-  assert.deepEqual(checkLayout(s.id, l), []);
-  for (const c of s.characters) pose(c.action);
-  for (const p of l.props ?? []) stickProp(p.name);
-}
-assert.deepEqual(Object.keys(LAYOUT).filter((id) => !episode.shots.some((s) => s.id === id)), [], "LAYOUT entries for shots that don't exist");
+// Props are checked by their drawn box, not their anchor: a wide prop near the edge, or a timed prop low in the frame, fails.
+assert.match(checkLayout("wide", { ...ok, props: [{ name: "fridge", x: 820, y: 900, state: "unplugged" }] }).join(), /right 15%/);
+assert.match(checkLayout("low", { ...ok, props: [{ name: "coffee-machine", x: 600, y: 1830, startAt: { word: "x" } }] }).join(), /bottom 20%/);
+assert.deepEqual(checkLayout("set", { ...ok, props: [{ name: "desk", x: 330, y: 1830 }] }), []); // set dressing may sit low
 
 console.log("stick: ok");

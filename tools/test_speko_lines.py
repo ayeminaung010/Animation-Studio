@@ -17,3 +17,7 @@ assert line_notes([{"text": "A. B.", "lines": [{"speaker": "x", "text": "A.", "d
 assert instructions({"instructions": "Warm."}, "panicked") == "Warm. This line: panicked"
 assert instructions({"instructions": "Warm."}, "") == "Warm."
 assert tempo_filter({}) == "anull" and tempo_filter({"tempo": 1.25}) == "atempo=1.25"
+
+import subprocess
+r = subprocess.run([sys.executable, str(Path(__file__).parent / "speko_lines.py"), "no-such-episode", "retim"], capture_output=True, text=True)
+assert r.returncode != 0 and "unknown mode" in r.stderr, r.stderr  # a typo must never fall through to a full (paid, destructive) run

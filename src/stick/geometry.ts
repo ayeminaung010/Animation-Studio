@@ -21,7 +21,7 @@ export const CAPTION_Y = SPLIT_Y / H;
 /** Half-height of the caption band: emphasis words are CAPTION_PX 128 × 1.3 ≈ 166 px tall (Captions.tsx). */
 export const CAPTION_HALF = 100;
 
-export const WATERMARK = { text: "Inkwell Life", x: 0.07 * W, y: 0.05 * H, px: 36, opacity: 0.45 } as const;
+export const WATERMARK = { text: "@InkwellLife", x: 0.07 * W, y: 0.05 * H, px: 36, opacity: 0.45 } as const;
 /** Generous box around the watermark text (Fredoka 36 px ≈ 0.62 em per glyph). */
 export const WATERMARK_BOX = {
   x0: WATERMARK.x,
@@ -58,6 +58,15 @@ export interface StickLayout {
 /** Who is talking at frame f: the speaker of the latest word that has started. */
 export const talkerAt = (words: { start: number; speaker?: string }[], f: number) => words.filter((w) => w.start <= f).pop()?.speaker;
 
+/** Drawn size of each prop at scale 1 around its bottom-centre anchor (src/stick/props.tsx): half-width, height. */
+export const PROP_SIZE: Record<string, { hw: number; h: number }> = {
+  router: { hw: 110, h: 170 }, computer: { hw: 170, h: 290 }, desk: { hw: 230, h: 190 }, armchair: { hw: 190, h: 330 },
+  fridge: { hw: 190, h: 460 }, oven: { hw: 150, h: 280 }, "cereal-box": { hw: 80, h: 240 }, "coffee-machine": { hw: 140, h: 220 },
+  window: { hw: 150, h: 260 }, lamp: { hw: 70, h: 400 }, mug: { hw: 60, h: 70 },
+};
+/** Every room slowly pushes in to this scale (StickShot), so boxes are checked at the end of the shot. */
+export const MAX_ZOOM = 1.04;
+
 /** Problems with one shot's staging: faces under the caption band or in the YouTube button zone, props in the right 15%. */
 export const checkLayout = (id: string, l: StickLayout): string[] => {
   const out: string[] = [];
@@ -70,6 +79,16 @@ export const checkLayout = (id: string, l: StickLayout): string[] => {
     if (!(b.y1 < top || b.y0 > bottom)) out.push(`${id}: ${who}'s face under captions`);
     if (b.y1 > 0.8 * H || b.x1 > 0.85 * W || b.x0 < 0) out.push(`${id}: ${who}'s face in the button zone`);
   }
-  for (const p of l.props ?? []) if (p.x > 0.85 * W) out.push(`${id}: prop ${p.name} in the right 15%`);
+  for (const p of l.props ?? []) {
+    const size = PROP_SIZE[p.name];
+    if (!size) {
+      out.push(`${id}: prop ${p.name} has no PROP_SIZE in src/stick/geometry.ts`);
+      continue;
+    }
+    const s = (p.scale ?? 1) * MAX_ZOOM;
+    if (p.x + size.hw * s > 0.85 * W) out.push(`${id}: prop ${p.name} in the right 15%`);
+    // Set dressing may sit low; a prop that pops in on a word is a story beat and must stay visible.
+    if (p.startAt !== undefined && p.y - size.h * s * 0.5 > 0.8 * H) out.push(`${id}: prop ${p.name} in the bottom 20%`);
+  }
   return out;
 };

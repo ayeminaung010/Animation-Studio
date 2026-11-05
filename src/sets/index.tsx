@@ -9,6 +9,8 @@ import { Road, TinyHouse } from "../props/buildings";
 import { Cottage } from "../props/village";
 import type { LightingName } from "../lib/shots";
 import { ColdDock, IslandBar, IslandPort, ShipDeck, ShipHold } from "./ice";
+import { Atlantic, EnemyHQ, WarRoom } from "./ww2";
+import { DazzleDeck, DazzleHarbour, DazzleSea, UboatControl } from "./dazzle";
 
 export interface SetProps {
   f: number;
@@ -530,6 +532,13 @@ export const SETS: Record<string, SetDef> = {
   "ship-hold": { component: ShipHold },
   "island-port": { component: IslandPort, sky: { "warm-key": "#8FD8F7" } },
   "island-bar": { component: IslandBar, sky: { "warm-key": "#F7B77A" } },
+  atlantic: { component: Atlantic, sky: { "warm-key": "#C9875C", "cold-blue": "#22374B" } },
+  "war-room": { component: WarRoom, sky: { "warm-key": "#3A2E22", "overhead-bulb": "#241C14", "cold-blue": "#2A2A32" } },
+  "enemy-hq": { component: EnemyHQ, sky: { "warm-key": "#6A4A32", "cold-blue": "#16202E", "overhead-bulb": "#2A2118" } },
+  "dazzle-harbour": { component: DazzleHarbour, sky: { "warm-key": "#9ED3F0" } },
+  "dazzle-deck": { component: DazzleDeck, sky: { "cold-blue": "#6F8798", "warm-key": "#A9C9DE" } },
+  "dazzle-sea": { component: DazzleSea, sky: { "cold-blue": "#6F8798", "warm-key": "#A9C9DE" } },
+  "uboat-control": { component: UboatControl, sky: { "red-rim": "#1A0A0C" } },
 };
 
 export const setDef = (name: string): SetDef => {

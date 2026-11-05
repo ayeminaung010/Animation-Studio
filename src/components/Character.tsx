@@ -135,6 +135,63 @@ const Hair: React.FC<{ style: string }> = ({ style }) => {
           </T>
         </group>
       );
+    case "flat-cap-slate":
+      return (
+        <group rotation={[-0.2, 0, 0]}>
+          <Cap color="#5C6B8A" theta={0.34} />
+          <T color="#4C5A76" position={[0, HEAD_R * 0.78, 0.2]} rotation={[0.25, 0, 0]} scale={[1, 0.25, 0.7]} outline={0.012}>
+            <sphereGeometry args={[0.2, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          </T>
+        </group>
+      );
+    /** 1940s trilby: narrow brim, pinched crown, dark band. */
+    case "trilby":
+      return (
+        <group rotation={[-0.16, 0, 0.05]}>
+          <T color="#3A3A3A" position={[0, HEAD_R * 0.8, 0]} outline={0.014}>
+            <cylinderGeometry args={[0.36, 0.36, 0.02, 30]} />
+          </T>
+          <T color="#3A3A3A" position={[0, HEAD_R * 0.8 + 0.1, 0]} scale={[1, 0.85, 0.9]} outline={0.014}>
+            <cylinderGeometry args={[0.2, 0.23, 0.18, 26]} />
+          </T>
+          <T color="#1E1E1E" position={[0, HEAD_R * 0.8 + 0.035, 0]} outline={false}>
+            <cylinderGeometry args={[0.234, 0.234, 0.05, 26]} />
+          </T>
+          <T color="#3A3A3A" position={[0, HEAD_R * 0.8 + 0.18, 0]} rotation={[0, 0, 0.08]} scale={[1, 0.35, 0.5]} outline={0.008}>
+            <sphereGeometry args={[0.17, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          </T>
+        </group>
+      );
+    /** Bowler: round dome and a rolled brim. */
+    case "bowler":
+      return (
+        <group rotation={[-0.12, 0, 0]}>
+          <T color="#1E1E1E" position={[0, HEAD_R * 0.8, 0]} outline={0.014}>
+            <cylinderGeometry args={[0.33, 0.33, 0.02, 30]} />
+          </T>
+          <T color="#1E1E1E" position={[0, HEAD_R * 0.8 + 0.11, 0]} outline={0.014}>
+            <sphereGeometry args={[0.25, 26, 14, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          </T>
+          <T color="#33333A" position={[0, HEAD_R * 0.8 + 0.035, 0]} outline={false}>
+            <cylinderGeometry args={[0.252, 0.252, 0.05, 26]} />
+          </T>
+        </group>
+      );
+    /** Steel helmet: low dome, wide rim, chin strap. */
+    case "helmet":
+      return (
+        <group rotation={[-0.1, 0, 0]}>
+          <T color="#6A7076" position={[0, HEAD_R * 0.78, 0]} scale={[1, 0.18, 1]} outline={0.016}>
+            <sphereGeometry args={[0.3, 26, 12]} />
+          </T>
+          <T color="#6A7076" position={[0, HEAD_R * 0.82, 0]} outline={0.016}>
+            <sphereGeometry args={[0.275, 26, 14, 0, Math.PI * 2, 0, Math.PI / 2.3]} />
+          </T>
+          <T color="#2B2F33" position={[0, HEAD_R * 0.68, 0.19]} rotation={[0.3, 0, 0]} scale={[1, 0.3, 0.6]} outline={0.008}>
+            <sphereGeometry args={[0.16, 18, 8, 0, Math.PI, 0, Math.PI / 2]} />
+          </T>
+        </group>
+      );
     case "peaked-cap":
       return (
         <group rotation={[-0.15, 0, 0]}>
@@ -155,6 +212,40 @@ const Hair: React.FC<{ style: string }> = ({ style }) => {
           <Cap color="#9A5A4E" theta={0.4} />
           <T color="#9A5A4E" position={[0.06, HEAD_R * 1.05, -0.08]} rotation={[-0.6, 0, -0.5]} outline={0.012}>
             <coneGeometry args={[0.12, 0.26, 12]} />
+          </T>
+        </group>
+      );
+    /** Low dark watch cap with a turned-up cuff. */
+    case "knit-cap-dark":
+      return (
+        <group rotation={[-0.22, 0, 0]}>
+          <Cap color="#2B2F36" theta={0.42} />
+          <T color="#3A3F48" position={[0, HEAD_R * 0.62, 0]} rotation={[-0.08, 0, 0]} outline={0.012}>
+            <torusGeometry args={[HEAD_R * 0.8, 0.045, 8, 28]} />
+          </T>
+        </group>
+      );
+    /** Floppy painter's beret, tipped to the right, with a little stalk. */
+    case "beret":
+      return (
+        <group rotation={[-0.2, 0, -0.32]}>
+          <T color="#1E1E28" position={[0.04, HEAD_R * 0.86, 0]} scale={[1, 0.28, 1]} outline={0.016}>
+            <sphereGeometry args={[0.33, 26, 14]} />
+          </T>
+          <T color="#1E1E28" position={[0.04, HEAD_R * 0.86 + 0.1, 0]} outline={0.008}>
+            <cylinderGeometry args={[0.012, 0.02, 0.07, 6]} />
+          </T>
+        </group>
+      );
+    /** White sailor's cap: a rolled brim and a short round crown. */
+    case "sailor-cap":
+      return (
+        <group rotation={[-0.14, 0, 0.06]}>
+          <T color="#F2F0EA" position={[0, HEAD_R * 0.8 + 0.06, 0]} outline={0.014}>
+            <cylinderGeometry args={[0.2, 0.22, 0.13, 24]} />
+          </T>
+          <T color="#F2F0EA" position={[0, HEAD_R * 0.8, 0]} rotation={[Math.PI / 2, 0, 0]} outline={0.014}>
+            <torusGeometry args={[0.235, 0.04, 8, 28]} />
           </T>
         </group>
       );
@@ -236,20 +327,21 @@ const Outfit: React.FC<{ look: Look }> = ({ look }) => {
 const BodyExtras: React.FC<{ list: string[]; tailLag?: number }> = ({ list, tailLag }) => {
   const front = 0.215;
   const tailTop: Vec3 = [0.08, 0.54, front + 0.02];
+  const scarf = list.includes("scarf-blue") ? "#2F6DB5" : "#E8413C";
   return (
     <group>
-      {list.includes("scarf") ? (
+      {list.includes("scarf") || list.includes("scarf-blue") ? (
         <group>
-          <T color="#E8413C" position={[0, 0.56, 0]} outline={0.012}>
+          <T color={scarf} position={[0, 0.56, 0]} outline={0.012}>
             <torusGeometry args={[0.17, 0.05, 10, 24]} />
           </T>
           {tailLag === undefined ? (
-            <T color="#E8413C" position={[0.08, 0.42, front + 0.02]} rotation={[0, 0, 0.15]} outline={0.01}>
+            <T color={scarf} position={[0.08, 0.42, front + 0.02]} rotation={[0, 0, 0.15]} outline={0.01}>
               <boxGeometry args={[0.08, 0.24, 0.04]} />
             </T>
           ) : (
             <group position={tailTop} rotation={[tailLag, 0, 0]}>
-              <T color="#E8413C" position={[0.08 - tailTop[0], 0.42 - tailTop[1], front + 0.02 - tailTop[2]]} rotation={[0, 0, 0.15]} outline={0.01}>
+              <T color={scarf} position={[0.08 - tailTop[0], 0.42 - tailTop[1], front + 0.02 - tailTop[2]]} rotation={[0, 0, 0.15]} outline={0.01}>
                 <boxGeometry args={[0.08, 0.24, 0.04]} />
               </T>
             </group>
@@ -265,6 +357,40 @@ const BodyExtras: React.FC<{ list: string[]; tailLag?: number }> = ({ list, tail
         ? [0.42, 0.3].map((y) => (
           <T key={y} color="#D4A93A" position={[0, y, front + 0.01]} outline={0.006}>
             <sphereGeometry args={[0.025, 10, 8]} />
+          </T>
+        ))
+        : null}
+      {list.includes("bowtie") ? (
+        <group position={[0, 0.5, front + 0.01]}>
+          {[1, -1].map((s) => (
+            <T key={s} color="#E8413C" position={[s * 0.075, 0, 0]} rotation={[0, 0, s * -0.18]} scale={[1, 0.8, 0.5]} outline={0.008}>
+              <coneGeometry args={[0.055, 0.11, 4]} />
+            </T>
+          ))}
+          <T color="#C0392B" outline={0.006}>
+            <sphereGeometry args={[0.035, 10, 8]} />
+          </T>
+          {[[-0.06, 0.02], [0.05, -0.02], [0.02, 0.035]].map(([x, y], i) => (
+            <T key={i} color="#FFFFFF" position={[x, y, 0.045]} outline={false}>
+              <sphereGeometry args={[0.011, 8, 6]} />
+            </T>
+          ))}
+        </group>
+      ) : null}
+      {list.includes("necktie") ? (
+        <group position={[0, 0.46, front + 0.005]}>
+          <T color="#14141F" position={[0, 0.07, 0]} rotation={[0, 0, Math.PI]} outline={0.006}>
+            <coneGeometry args={[0.035, 0.07, 3]} />
+          </T>
+          <T color="#14141F" position={[0, -0.1, 0]} rotation={[0, 0, Math.PI]} outline={0.006}>
+            <coneGeometry args={[0.045, 0.28, 3]} />
+          </T>
+        </group>
+      ) : null}
+      {list.includes("watch-chain")
+        ? [0.44, 0.38, 0.32].map((y, i) => (
+          <T key={y} color="#D4A93A" position={[-0.08 + i * 0.035, y, front + 0.012]} outline={0.004}>
+            <sphereGeometry args={[0.012, 8, 6]} />
           </T>
         ))
         : null}
@@ -357,7 +483,7 @@ const Arm: React.FC<{
 };
 
 /** Hair styles that are hats: they get follow-through; hair caps stay glued to the skull. */
-const HATS = new Set(["top-hat", "flat-cap", "peaked-cap", "knit-cap", "panama"]);
+const HATS = new Set(["top-hat", "flat-cap", "flat-cap-slate", "peaked-cap", "knit-cap", "knit-cap-dark", "beret", "sailor-cap", "panama", "trilby", "bowler", "helmet"]);
 /** Hat pivot: the crown of the head. */
 const HAT_PIVOT: Vec3 = [0, HEAD_R * 0.8, 0];
 

@@ -67,8 +67,10 @@ def synth(speko, cfg, spk, voice, text, out, note=""):
 
 
 def main():
-    if len(sys.argv) < 2: sys.exit("usage: python3 tools/speko_lines.py <slug> [samples]")
+    if len(sys.argv) < 2: sys.exit("usage: python3 tools/speko_lines.py <slug> [samples|retime]")
     slug, mode = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else "all")
+    # A full run deletes the raw takes and pays for new ones: never fall into it by a typo.
+    if mode not in ("all", "samples", "retime"): sys.exit(f"unknown mode {mode!r} (samples, retime, or nothing for a full run)")
     ep = ROOT / f"episodes/{slug}"
     cfg = json.loads((ep / "04-voices.json").read_text())
     shots_path = ep / "03-shots.json"

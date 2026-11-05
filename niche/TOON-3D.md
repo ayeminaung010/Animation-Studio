@@ -57,7 +57,7 @@ A new scene (a **hard cut**) is allowed only on a PUNCH word, **at most 5 per 60
 The cast is locked at STATE 4 and every later block references cast by ID only. Never redescribe a character inside a scene. The hero is identified by **hat + torso colour + one accessory**, and these never change mid-video. Heads are always white spheres. The hero's default expression is `smug` (he knows something) and it holds until the payoff.
 
 ### 5. The Fit Law
-Word budget per beat = `beat_seconds × wps × 0.95`. Default `wps = 3.6` (the reference narrator measures 3.7). VO is **wall-to-wall from frame 0 to the last frame**: no intro silence, no outro, no title card, no CTA. **No gap longer than 0.25 s** anywhere in the mix; the music/ambience bed runs under everything.
+Word budget per beat = `beat_seconds × wps × 0.95`. Default `wps = 3.6` (the reference narrator measures 3.7). VO is **wall-to-wall from frame 0 to the last frame**: no intro silence, no title card, and the only outro is the one CTA line (see the Ending Rule below). The CTA's words count toward the total word budget and the runtime target. **No gap longer than 0.25 s** anywhere in the mix; the music/ambience bed runs under everything.
 After TTS, if the real runtime is more than **5% over target**, cut words from beats 4–5 and re-run TTS. Never speed the voice up beyond 1.08×, and never ship long. Frames are re-derived from the real word timestamps and every scene boundary snaps to a word.
 
 ### 6. The Caption & Text Law
@@ -109,7 +109,7 @@ On a FAIL, the failing metric names the fix: too many cuts → merge scenes; fro
 | Runtime | 64 s (target 60) |
 | Narration | Starts at frame 0, ends on the last frame, ~238 words, 3.7 wps |
 | Hard cuts | ~4 in 64 s |
-| Outro / CTA / title card | None. Ends on the punchline. |
+| Outro / CTA / title card | No title card. The story ends on the punchline, then one spoken CTA line (channel rule; the references had none). |
 | Audio | Continuous bed (no gap > 0.25 s below −45 dB), hot master (mean −17 dB, peaks −2 dB) |
 
 ### Title formulas
@@ -129,7 +129,8 @@ On a FAIL, the failing metric names the fix: too many cuts → merge scenes; fro
 | 5 | ESCALATION | 33–55 | Waiting, repeated failure, rising stakes, jokes | Race after race the hill stays dark; "Hey, mirror man. Maybe try wiping it." | Waves taller than the mast; crew ties themselves down; he keeps pouring, always windward. |
 | 6 | TRIGGER + ALL-IN | 55–70 | Signal fires, hero commits everything, one last insult | Hill flashes → every dollar on horse nine. "That horse lost a race to the milk cart, and it was pulling milk." | Pirates swing in to board; a wave big enough to swallow both ships rises out of the dark. |
 | 7 | "YOU SEE" — mechanism | 70–85 | Narrator pauses the climax to explain the real trick in 2–4 sentences, using one everyday analogy | "You see, back then, betting rooms didn't find out who won until the winner came clicking in over a wire. So until it did, bets stayed open." | "You see, sailors really carried oil just for this… The broth ripples, but the oily part stays perfectly smooth, because your breath can't grab it." |
-| 8 | PAYOFF + REVERSAL | 85–100 | The mechanism plays out on screen; the last line inverts beat 2 | "…by the time it spells out nine, nobody's laughing anymore." | Wave lifts their ship, sets it down, curls over and drops straight onto the pirates' deck. |
+| 8 | PAYOFF + REVERSAL | 85–97 | The mechanism plays out on screen; the last line inverts beat 2 | "…by the time it spells out nine, nobody's laughing anymore." | Wave lifts their ship, sets it down, curls over and drops straight onto the pirates' deck. |
+| 9 | CTA | 97–100 | One spoken line asking viewers to like and subscribe (Ending Rule) | — | — |
 
 ### Voice DNA
 - Present tense throughout ("He bet… The room is laughing…"), except the "You see, back then" clause.
@@ -137,8 +138,9 @@ On a FAIL, the failing metric names the fix: too many cuts → merge scenes; fro
 - Antagonist dialogue is quoted and delivered by the narrator in a character voice: a sneer, a bark.
 - 2–3 comedic insults or understatements in beats 5–6 ("and it was pulling milk", "Why waste a cannonball when the storm will do it for free?").
 - One everyday analogy in beat 7 (blowing on soup).
-- The final line is ≤ 8 words and lands on a hard consonant or a reversal word ("anymore", "deck").
-- Never: "In this video", "Did you know", rhetorical openers, a moral at the end, "subscribe".
+- The final story line is ≤ 8 words and lands on a hard consonant or a reversal word ("anymore", "deck").
+- **Ending Rule (channel):** right after the final story line, the narrator says one CTA line, by default **"Like and subscribe for more."** (≤ 6 words, about 2 s), warm and smiling, a notch below the punchline's energy. Nothing else follows it.
+- Never: "In this video", "Did you know", rhetorical openers, a moral at the end, or a CTA anywhere except the one Ending Rule line.
 
 ### Visual DNA — render style
 - **Real-time 3D, toon/cel-shaded**: 2–3 band shading, ink outlines on everything (inverted hull or post edge pass, ~2–3 px at 1080 w), painterly hand-textured surfaces (wood grain, posters, sails), saturated palette, soft contact shadows.
@@ -412,7 +414,7 @@ STOP. WAIT.
 
 Then output:
 - `durationInFrames = seconds × 30`, resolution, and total word budget = `seconds × wps × 0.95`
-- The beat table: `beat | label | % range | startFrame–endFrame | seconds | word budget | pacing mark`, using the % ranges from PART TWO. Default pacing: 1 PUNCH, 2 PUNCH, 3 BREATHE, 4 LAND, 5 PUNCH→BREATHE, 6 PUNCH, 7 BREATHE, 8 LAND.
+- The beat table: `beat | label | % range | startFrame–endFrame | seconds | word budget | pacing mark`, using the % ranges from PART TWO. Default pacing: 1 PUNCH, 2 PUNCH, 3 BREATHE, 4 LAND, 5 PUNCH→BREATHE, 6 PUNCH, 7 BREATHE, 8 LAND, 9 LAND (CTA, fixed at the CTA line's word count).
 - For 30 s: merge beats 2+3 and 4+5 (six beats). For 75 s: beat 5 may hold a second failure-repeat.
 - For 16:9 or 1:1: captions move to `yRatio 0.78` and the safe area widens; note it.
 
@@ -431,7 +433,7 @@ He bet his life savings on the slowest horse in the race.
 
 Rules:
 - Every beat is within ±2 words of its budget. Show `budget / actual`.
-- The Voice DNA applies: present tense, quoted antagonist lines tagged with speaker `(cast.skeptic)`, 2–3 jokes in beats 5–6, beat 7 opens with "You see," and uses one analogy, and the final line is ≤ 8 words and inverts beat 2.
+- The Voice DNA applies: present tense, quoted antagonist lines tagged with speaker `(cast.skeptic)`, 2–3 jokes in beats 5–6, beat 7 opens with "You see," and uses one analogy, the final story line is ≤ 8 words and inverts beat 2, and beat 9 is the single CTA line.
 - SFX cues are inline as `[sfx: cue @word]`.
 - Diegetic text the story needs is inline as `[sign: "BETS OPEN" on prop.window]`.
 
@@ -439,7 +441,7 @@ Then the **VOICEOVER DIRECTION** block: voice archetype, wps, energy per beat (1
 
 Then: **next, or tell me what to change.** Loop until approved. On approval, go to STATE 4 on my next reply.
 
-SELF-CHECK: word counts in budget · frame-0 act is visual · "You see" sits in beat 7 · reversal mirrors beat 2 · no invented names or dates stated as fact.
+SELF-CHECK: word counts in budget · frame-0 act is visual · "You see" sits in beat 7 · reversal mirrors beat 2 · the CTA line is last and is the only CTA · no invented names or dates stated as fact.
 
 ---
 
@@ -553,7 +555,7 @@ Output one complete, merged `project.json` matching the contract (or my schema),
 - Never combine states or preview a later state.
 - Never write image/video-generator prompts for scenes. Scenes are JSON for my engine; only props marked `generate` get a prompt.
 - Never bake captions or narration into the 3D world.
-- Never add an intro card, outro, CTA, moral or "subscribe".
+- Never add an intro card, title card or moral, and never a CTA other than the single Ending Rule line after the punchline.
 - Never give characters names, or invent dates and places stated as fact.
 - Never change the hero's hat, colour or accessory mid-video.
 - Never exceed 5 hard cuts or hold a dead-static frame.
@@ -570,6 +572,10 @@ Output one complete, merged `project.json` matching the contract (or my schema),
 - **Measured from the references**: 64.1 s and 64.6 s, 1080×1920 @ 30 fps, ~238 words (3.7 wps), 4 hard cuts in one video and none detected in the other, continuous audio bed, captions centred at ~70% height. The "You see" pivot lands at 71% (Mirror) and 66% (Storm Oil).
 
 ## Changelog
+**v1.2** (channel rule, after "How a Paintbrush Beat a Submarine")
+- **Ending Rule:** every video closes with one spoken CTA line after the punchline (default "Like and subscribe for more."), as beat 9 (97–100%). It counts toward the word budget and runtime; the renderer shows a small like/subscribe card in the watermark's glass style while it plays.
+- Every video carries the @InkwellLife watermark (see CLAUDE.md).
+
 **v1.1** (after the first test render, "Ice King": 79 s, 22 cuts, average take 3.4 s, 7.6% frozen frames, ~10 abrupt starts/min, 14 audio gaps)
 - The unit of picture is now the **scene** (a continuous take with one camera track) instead of per-beat shots. v1's `shots[]` were being rendered as hard cuts.
 - New **Living Frame Law** (9): performance tracks for every character, with idle, breath, blinks, gaze chains, anticipated gestures, delayed reactions, lip-flap and follow-through.
