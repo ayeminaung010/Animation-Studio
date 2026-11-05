@@ -9,6 +9,7 @@
   },
   "private": true,
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.318",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@remotion/captions": "4.0.539",
@@ -29,6 +30,7 @@
     "@types/react": "19.2.7",
     "@types/three": "^0.186.0",
     "@types/web": "0.0.166",
+    "esbuild": "^0.28.1",
     "eslint": "10.12.0",
     "prettier": "3.8.1",
     "typescript": "5.9.3"
@@ -38,7 +40,7 @@
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
-    "check": "tsc --noEmit && eslint src",
+    "check": "tsc --noEmit && eslint src && tsc -p studio",
     "stills": "node tools/ep.mjs stills",
     "render": "node tools/ep.mjs render",
     "audio": "node tools/ep.mjs audio",
@@ -47,7 +49,9 @@
     "mix:check": "node tools/ep.mjs mix:check",
     "qa": "node tools/ep.mjs qa",
     "clean": "node tools/clean.mjs",
-    "test": "node tools/run-ts.mjs tools/test-motion.ts && node tools/run-ts.mjs tools/test-scenes.ts && node tools/run-ts.mjs tools/test-stick.ts",
+    "test": "node tools/run-ts.mjs tools/test-motion.ts && node tools/run-ts.mjs tools/test-scenes.ts && node tools/run-ts.mjs tools/test-stick.ts && npm run test:studio",
+        "test:studio": "node --test studio/test/",
+        "studio": "node studio/build-web.mjs && node studio/server/index.ts",
     "render:draft": "node tools/ep.mjs render:draft"
   },
   "allowScripts": {

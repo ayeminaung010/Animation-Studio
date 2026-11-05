@@ -38,6 +38,26 @@ npm run render -- <slug>                             # → out/<slug>.mp4
 
 No GPU (servers, CI): `export REMOTION_GL=swangle`. Custom Chrome: `export REMOTION_BROWSER=/path/to/chrome`.
 
+## Studio
+
+A local web page that turns a story idea into a finished episode through a Claude Code agent, on either the 3D
+engine (this repo) or the lemo-opuscar 2D engine.
+
+```bash
+npm run studio          # builds studio/web/dist/app.js, then starts the server
+```
+
+Open <http://127.0.0.1:4317> (change the port with `STUDIO_PORT`). The server only listens on `127.0.0.1`.
+
+- Needs a working `claude` login (Claude Code, the same one the terminal uses).
+- Lemo jobs need `~/lemo-opuscar` set up: `setup.sh deps voice music`.
+- One job runs at a time. Each job plans first, waits for your approval (or revision notes), then produces.
+- Files: job data and logs in `studio-data/` (git-ignored); the finished video is `out/<slug>.mp4`;
+  3D plans are `episodes/<slug>/PLAN.md`; lemo films are made in `studio-data/films/<slug>/`.
+- A server restart marks a running job as failed (`server restarted`); **Retry** resumes its session.
+
+Tests: `npm run test:studio`.
+
 ## New episode
 
 1. Put `03-shots.json`, `04-words.json` in `episodes/<slug>/` and `voice.mp3` in `public/episodes/<slug>/`.

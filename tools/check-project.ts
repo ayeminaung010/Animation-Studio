@@ -6,16 +6,18 @@ import { readFileSync, writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { isHardCut, validateProject, type ProjectV11 } from "../src/lib/scenes";
 
-const BEAT_PCT = [0, 5, 12, 20, 33, 55, 70, 85, 100];
+// Beat start %s; v1.2 adds beat 9 (the CTA line, 97–100 %). v1.1 projects have 8 beats.
+const BEAT_PCT: Record<number, number[]> = { 8: [0, 5, 12, 20, 33, 55, 70, 85, 100], 9: [0, 5, 12, 20, 33, 55, 70, 85, 97, 100] };
 
 export const estimateWords = (p: ProjectV11) => {
   const tokens = (p.vo.script ?? "").split(/\s+/).filter(Boolean);
   const beats = p.beats ?? [];
-  assert.equal(beats.length, 8, "estimate needs the 8 beats");
+  const pct = BEAT_PCT[beats.length];
+  assert.ok(pct, "estimate needs 8 beats (v1.1) or 9 (v1.2, with the CTA)");
   const words: ProjectV11["vo"]["words"] = [];
   beats.forEach((b, i) => {
-    const f0 = (BEAT_PCT[i] / 100) * p.meta.durationInFrames;
-    const f1 = (BEAT_PCT[i + 1] / 100) * p.meta.durationInFrames;
+    const f0 = (pct[i] / 100) * p.meta.durationInFrames;
+    const f1 = (pct[i + 1] / 100) * p.meta.durationInFrames;
     const n = b.toWord - b.fromWord + 1;
     for (let k = 0; k < n; k++) {
       const w = tokens[b.fromWord + k];
@@ -52,7 +54,9 @@ export const checkProject = (p: ProjectV11) => {
   }
 
   const hero = p.cast.find((c) => c.role === "hero")?.id;
-  const payoff = p.beats?.[p.beats.length - 1]?.fromWord ?? Infinity;
+  const payoff = (p.beats?.find((b) => b.label.startsWith("PAYOFF")) ?? p.beats?.[p.beats.length - 1])?.fromWord ?? Infinity;
+  const cta = p.beats?.find((b) => b.label === "CTA");
+  if (p.beats?.length === 9 && (!cta || cta.toWord !== W.length - 1)) fails.push("beat 9 must be the CTA and end on the last word");
   p.scenes.forEach((s, i) => {
     const n = s.camera.keys.length;
     if (n < 3 || n > 6) fails.push(`${s.id}: ${n} camera keys (3–6)`);

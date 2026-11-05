@@ -10,3 +10,6 @@ out/
 public/episodes/
 public/audio/
 .superpowers/
+/studio-data/
+/studio/web/dist/
+.playwright-mcp/

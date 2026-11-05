@@ -60,8 +60,9 @@ renders it. Read `README.md` for the layout and `SETUP.md` for commands.
   Keep faces and key action clear of that corner.
 - Every episode ends with a call to action: right after the punchline the narrator says one line, by default
   "Like and subscribe for more." (~2 s, part of the script, the word budget and the runtime target), while a small
-  like/subscribe card in the same glass style as the watermark pops in above the captions. The picture keeps moving
-  under it (no freeze, no separate end screen), and nothing else follows it.
+  like/subscribe card (`<GlassCta />` in `src/components/GlassCta.tsx`, in a `<Sequence>` from the CTA's first word)
+  pops in above the captions. The picture keeps moving under it (no freeze, no separate end screen), and nothing
+  else follows it.
 - Engine-contract episodes (`niche/TOON-3D.md`) render straight from `episodes/<slug>/project.json` through
   `loadProject` (`src/lib/project.ts`: contract units × 1.75 → world, grade → lighting); check them with
   `node tools/run-ts.mjs tools/check-project.ts <slug>` (`--words` after TTS). Voice: `npm run voice -- <slug>`,
